@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:text="@string/create_record_button_text"
         android:id="@+id/picturebutton"
-        android:onClick="takePicture"
+        android:onClick="createRecord"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

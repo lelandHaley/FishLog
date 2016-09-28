@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
 //        }
 //    }
 
-    public void takePicture(View view) {
+    public void createRecord(View view) {
         System.out.println("Taking picture");
         dispatchTakePictureIntent();
     }
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
             if (photoFile != null) {
                 Uri photoURI = null;
                 photoURI = FileProvider.getUriForFile(this,
-                        "capstone.hellodroid.android.fileprovider",
+                        "wildlogic.fishlog.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
