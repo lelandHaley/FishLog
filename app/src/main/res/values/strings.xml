@@ -1,0 +1,5 @@
+<resources>
+    <string name="title">Fish Log</string>
+    <string name="welcome_banner">Welcome To Your Fish Log</string>
+    <string name="create_record_button_text">Record Fish</string>
+</resources>
