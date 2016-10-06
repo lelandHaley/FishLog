@@ -1,6 +1,7 @@
 package wildlogic.fishlog;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.icu.text.BreakIterator;
 import android.location.Location;
 import android.net.Uri;
@@ -103,7 +104,10 @@ public class MainActivity extends AppCompatActivity
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
+        File pictureFile = new File(Environment.getExternalStorageDirectory() + "/imageFileName");
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        System.out.println("Environment.DIRECTORY_PICTURES is " + Environment.getExternalStorageDirectory());
+        System.out.println("getExternalFilesDir is " + getExternalFilesDir(Environment.DIRECTORY_PICTURES));
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -112,6 +116,9 @@ public class MainActivity extends AppCompatActivity
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            if(storageDir.exists()){
+                System.out.println("file exists");
+            }
         return image;
     }
 
@@ -131,24 +138,71 @@ public class MainActivity extends AppCompatActivity
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = null;
-                photoURI = FileProvider.getUriForFile(this,
-                        "wildlogic.fishlog.android.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+//                Uri photoURI = null;
+//                photoURI = FileProvider.getUriForFile(this,
+//                        "wildlogic.fishlog.android.fileprovider",
+//                        photoFile);
+//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                Uri mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+                        "pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
+
+                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
+                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+
             }
         }
     }
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK ) {
+            if(data != null) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+//            mImageView.setImageBitmap(imageBitmap);
+            }
+        }
+//        if (requestCode == PICK_CONTACT_REQUEST) {
+//            if (resultCode == RESULT_OK) {
+//                // A contact was picked.  Here we will just display it
+//                // to the user.
+//                startActivity(new Intent(Intent.ACTION_VIEW, data));
+//            }
+//        }
+        galleryAddPic();
+    }
+
 
     protected void onStart() {
+        System.out.println("in onStart");
         mGoogleApiClient.connect();
         super.onStart();
     }
 
     protected void onStop() {
+        System.out.println("in onStop");
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    protected void onPause(){
+        System.out.println("in onPause");
+        super.onPause();
+    }
+
+    protected void onResume(){
+        System.out.println("in onResume");
+        super.onResume();
     }
 
 
