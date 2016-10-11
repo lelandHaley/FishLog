@@ -1,5 +1,19 @@
 <resources>
     <string name="title">Fish Log</string>
     <string name="welcome_banner">Welcome To Your Fish Log</string>
-    <string name="create_record_button_text">Record Fish</string>
+    <string name="create_record_button_text">Save Fish</string>
+    <string name="save_record">Record Fish</string>
+    <string-array name="fish_species_array">
+        <item>Muskellunge</item>
+        <item>Northern Pike</item>
+        <item>Largemouth Bass</item>
+        <item>Smallmouth Bass</item>
+        <item>Walleye/Sauger</item>
+        <item>Brook Trout</item>
+        <item>Brown Trowt</item>
+        <item>Rainbow Trout</item>
+        <item>Panfish</item>
+    </string-array>
 </resources>
+
+

@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity
 
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_CREATE_RECORD = 1;
 
     public String mCurrentPhotoPath;
 
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private String locLat, locLong;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-
+    private Uri mUri;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,10 +146,10 @@ public class MainActivity extends AppCompatActivity
 //                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                Uri mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
-                        "pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
+                //mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+                 //       "pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
 
-                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
+                //intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
                 startActivityForResult(intent, REQUEST_TAKE_PHOTO);
 
             }
@@ -169,6 +170,11 @@ public class MainActivity extends AppCompatActivity
             if(data != null) {
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
+                System.out.println("data is not null in onActivityForResult");
+
+                Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
+                i.putExtra("pictureData", imageBitmap);
+                startActivityForResult(i , REQUEST_CREATE_RECORD);
 //            mImageView.setImageBitmap(imageBitmap);
             }
         }
@@ -179,7 +185,7 @@ public class MainActivity extends AppCompatActivity
 //                startActivity(new Intent(Intent.ACTION_VIEW, data));
 //            }
 //        }
-        galleryAddPic();
+        //galleryAddPic();
     }
 
 
@@ -241,5 +247,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // TODO Auto-generated method stub
+        super.onSaveInstanceState(outState);
+        System.out.println(mCurrentPhotoPath);
+        //imageView = (ImageView) findViewById(R.id.imageView1);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        // TODO Auto-generated method stub
+        super.onRestoreInstanceState(savedInstanceState);
+        System.out.println(mCurrentPhotoPath);
+        //imageView = (ImageView) findViewById(R.id.imageView1);
     }
 }
