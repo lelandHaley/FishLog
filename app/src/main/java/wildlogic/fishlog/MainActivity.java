@@ -2,6 +2,7 @@ package wildlogic.fishlog;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.text.BreakIterator;
 import android.location.Location;
 import android.net.Uri;
@@ -22,6 +23,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private Uri mUri;
+    private File tempImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,8 +109,9 @@ public class MainActivity extends AppCompatActivity
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File pictureFile = new File(Environment.getExternalStorageDirectory() + "/imageFileName");
+        //File pictureFile = new File(Environment.getExternalStorageDirectory() + "/imageFileName");
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+      //  File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         System.out.println("Environment.DIRECTORY_PICTURES is " + Environment.getExternalStorageDirectory());
         System.out.println("getExternalFilesDir is " + getExternalFilesDir(Environment.DIRECTORY_PICTURES));
         File image = File.createTempFile(
@@ -116,10 +121,12 @@ public class MainActivity extends AppCompatActivity
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        mCurrentPhotoPath = image.getAbsolutePath();
             if(storageDir.exists()){
                 System.out.println("file exists");
             }
+        System.out.println("Path is : " + image.getAbsolutePath());
+        tempImage = image;
         return image;
     }
 
@@ -139,25 +146,28 @@ public class MainActivity extends AppCompatActivity
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-//                Uri photoURI = null;
-//                photoURI = FileProvider.getUriForFile(this,
-//                        "wildlogic.fishlog.android.fileprovider",
-//                        photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                //mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
-                 //       "pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
-
-                //intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
-                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+                Uri photoURI = null;
+                photoURI = FileProvider.getUriForFile(this,
+                        "wildlogic.fishlog.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//
+//                mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+//                        //"pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
+//                        photoURI.getEncodedPath() + ".jpg"));
+//
+//                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
+//
+               // Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
 
             }
         }
     }
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
+        File f = new File("file:" + mCurrentPhotoPath);
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
@@ -166,17 +176,33 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK ) {
-            if(data != null) {
-                Bundle extras = data.getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                System.out.println("data is not null in onActivityForResult");
+        if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode ==  REQUEST_TAKE_PHOTO) && resultCode == RESULT_OK ) {
+//            if(data != null) {
+//                Bundle extras = data.getExtras();
+//                Bitmap imageBitmap = (Bitmap) extras.get("data");
+//                System.out.println("data is not null in onActivityForResult");
 
-                Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
-                i.putExtra("pictureData", imageBitmap);
-                startActivityForResult(i , REQUEST_CREATE_RECORD);
-//            mImageView.setImageBitmap(imageBitmap);
+           // File root = Environment.getExternalStorageDirectory();
+          //  Bitmap bMap = BitmapFactory.decodeFile(root+"/images/01.jpg");
+
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = null;
+            //Bitmap bitmap = BitmapFactory.decodeFile("file:" + mCurrentPhotoPath, options);
+            try {
+                bitmap = BitmapFactory.decodeStream(new FileInputStream(tempImage), null, options);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
+
+
+            Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
+            //i.putExtra("pictureData", bitmap);
+            i.putExtra("pictureData", tempImage);
+            startActivityForResult(i , REQUEST_CREATE_RECORD);
+//            mImageView.setImageBitmap(imageBitmap);
+
         }
 //        if (requestCode == PICK_CONTACT_REQUEST) {
 //            if (resultCode == RESULT_OK) {

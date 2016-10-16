@@ -3,6 +3,14 @@
     <string name="welcome_banner">Welcome To Your Fish Log</string>
     <string name="create_record_button_text">Save Fish</string>
     <string name="save_record">Record Fish</string>
+    <string name="lure_used">Lure Used</string>
+    <!--<string name="save_record">Record Fish</string>-->
+    <!--<string name="save_record">Record Fish</string>-->
+    <!--<string name="save_record">Record Fish</string>-->
+    <!--<string name="save_record">Record Fish</string>-->
+    <!--<string name="save_record">Record Fish</string>-->
+
+
     <string-array name="fish_species_array">
         <item>Muskellunge</item>
         <item>Northern Pike</item>
