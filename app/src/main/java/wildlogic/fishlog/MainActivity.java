@@ -1,11 +1,14 @@
 package wildlogic.fishlog;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.BreakIterator;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
@@ -28,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
 import wildlogic.*;
 import wildlogic.fishlog.R;
 
@@ -133,7 +138,8 @@ public class MainActivity extends AppCompatActivity
 
 
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+      //  Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent("android.media.action.IMAGE_CAPTURE");
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
@@ -160,7 +166,20 @@ public class MainActivity extends AppCompatActivity
 //                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
 //
                // Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                    takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                }
+                else {
+                    List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                    for (ResolveInfo resolveInfo : resInfoList) {
+                        String packageName = resolveInfo.activityInfo.packageName;
+                        grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    }
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                }
 
             }
         }
@@ -176,6 +195,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1777)
+        {
+            //Get our saved file into a bitmap object:
+            File file = new File(Environment.getExternalStorageDirectory()+File.separator + "image.jpg");
+            //Bitmap bitmap = decodeSampledBitmapFromFile(file.getAbsolutePath(), 1000, 700);
+        }
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode ==  REQUEST_TAKE_PHOTO) && resultCode == RESULT_OK ) {
 //            if(data != null) {
 //                Bundle extras = data.getExtras();
@@ -200,6 +225,9 @@ public class MainActivity extends AppCompatActivity
             Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
             //i.putExtra("pictureData", bitmap);
             i.putExtra("pictureData", tempImage);
+
+            i.putExtra("recLat", locLat);
+            i.putExtra("recLon", locLong);
             startActivityForResult(i , REQUEST_CREATE_RECORD);
 //            mImageView.setImageBitmap(imageBitmap);
 
