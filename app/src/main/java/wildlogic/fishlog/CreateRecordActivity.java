@@ -3,10 +3,12 @@ package wildlogic.fishlog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -16,6 +18,13 @@ import android.app.Activity;
 import android.os.Bundle;
 
 
+//import com.android.internal.http.multipart.MultipartEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,14 +32,22 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -63,8 +80,9 @@ public class CreateRecordActivity extends AppCompatActivity {
     private String username = "uroot";//user must have read-write permission to Database
     private String password = "proot";//user password, possible security risk here
     String recLat, recLon;
-
+    Bitmap recordImage = null;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -84,6 +102,8 @@ public class CreateRecordActivity extends AppCompatActivity {
             System.out.println("in networkConnection.insertRecord");
             //Connection con = null;
             HttpURLConnection conn = null;
+            HttpClient httpClient = new DefaultHttpClient();
+            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
             try {
                 URL url = new URL(urlString);
                 Map<String, Object> params1 = new LinkedHashMap<>();
@@ -94,6 +114,10 @@ public class CreateRecordActivity extends AppCompatActivity {
                 params1.put("recLure", params[4]);
                 params1.put("recWeather", params[5]);
                 params1.put("recSpecies", params[6]);
+                //  params1.put("recImage", recordImage);
+                params1.put("recImage", params[7]);
+
+
 //                params1.put("function", "insertRecord");
 //                params1.put("recName", recName);
 //                params1.put("recLat", recLat);
@@ -112,13 +136,12 @@ public class CreateRecordActivity extends AppCompatActivity {
                 }
                 byte[] postDataBytes = postData.toString().getBytes("UTF-8");
 
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
+                // conn = (HttpURLConnection) url.openConnection();
+                //conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
                 conn.setDoOutput(true);
                 conn.getOutputStream().write(postDataBytes);
-
                 //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                 int status = conn.getResponseCode();
 //                for (int c; (c = in.read()) >= 0; )
@@ -129,6 +152,88 @@ public class CreateRecordActivity extends AppCompatActivity {
             }
             return "some message";
         }
+
+
+
+
+//
+//
+//                conn = (HttpURLConnection) url.openConnection();
+//                Bitmap bitmap = recordImage;
+//                String filename = "filename.png";
+//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+//                ContentBody contentPart = new ByteArrayBody(bos.toByteArray(), filename);
+//                //MultipartEntityBuilder b = new MultipartEntityBuilder();
+//                MultipartEntityBuilder reqEntity;
+//                reqEntity = MultipartEntityBuilder.create();
+//                //MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+//                reqEntity.addPart("picture", contentPart);
+//                HttpEntity ent = reqEntity.build();
+//               // HttpEntity httpEntity = multipartBuilder.build();
+//                httpPost.setEntity(ent);  // Error line
+//                HttpResponse response = httpClient.execute(httpPost);
+//                System.out.println(EntityUtils.toString(response.getEntity()));
+//                //Utility.showLog(TAG, EntityUtils.toString(response.getEntity()));
+//
+//                //String response = multipost("http://server.com", ent);
+//             //   String response = multipost("http://server.com", reqEntity);
+//
+//
+//
+//                conn.setReadTimeout(10000);
+//                conn.setConnectTimeout(15000);
+//                conn.setRequestMethod("POST");
+//                conn.setUseCaches(false);
+//                conn.setDoInput(true);
+//                conn.setDoOutput(true);
+//
+//                //conn.setRequestProperty("Connection", "Keep-Alive");
+//                //conn.addRequestProperty("Content-length", );
+//
+//                //conn.addRequestProperty("Content-length", reqEntity.getContentLength()+"");
+//               // conn.addRequestProperty(reqEntity.getContentType().getName(), reqEntity.getContentType().getValue());
+//
+//                OutputStream os = conn.getOutputStream();
+//                ent.writeTo(conn.getOutputStream());
+//                //reqEntity.writeTo(conn.getOutputStream());
+//                os.close();
+//                conn.connect();
+//
+//                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+//                    return readStream(conn.getInputStream());
+//                }
+//
+//            } catch (Exception e) {
+//                //Log.e(TAG,"");
+//                System.out.println("multipart post error " + e + "(" + urlString + ")");
+//            }
+//            return null;
+//        }
+//
+////        private String readStream(InputStream in) {
+////            BufferedReader reader = null;
+////            StringBuilder builder = new StringBuilder();
+////            try {
+////                reader = new BufferedReader(new InputStreamReader(in));
+////                String line = "";
+////                while ((line = reader.readLine()) != null) {
+////                    builder.append(line);
+////                }
+////            } catch (IOException e) {
+////                e.printStackTrace();
+////            } finally {
+////                if (reader != null) {
+////                    try {
+////                        reader.close();
+////                    } catch (IOException e) {
+////                        e.printStackTrace();
+////                    }
+////                }
+////            }
+////            return builder.toString();
+////        }
+
 
         @Override
         protected void onPostExecute(String message) {
@@ -166,6 +271,7 @@ public class CreateRecordActivity extends AppCompatActivity {
         speciesSpinner.setAdapter(adapter);
         ImageView img = (ImageView) findViewById(R.id.picture_preview_view);
         img.setImageBitmap(bitmap);
+        recordImage = bitmap;
         EditText nameField = (EditText) findViewById(R.id.nameField);
         nameField.setText(tempImage.getName());
 
@@ -246,20 +352,21 @@ public class CreateRecordActivity extends AppCompatActivity {
         String recLure = lureField.getText().toString();
         String recWeather = weatherField.getText().toString();
         String recSpecies = speciesSpinner.getSelectedItem().toString();
-//        try{
-//
-//            Class.forName(driver).newInstance();  //loads driver
-//           con = DriverManager.getConnection(urlString,username,password);
-//
-//
-//        }
-//        catch(Exception e){
-//            e.printStackTrace();
-//        }
+
+
+       ImageView img = (ImageView) findViewById(R.id.picture_preview_view);
+       Bitmap recordPic = ((BitmapDrawable)img.getDrawable()).getBitmap();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        recordPic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+
+        String encodedBytes = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
         //try {
             //URL url = new URL(urlString);
-            String[] parameters = new String[7];
+            String[] parameters = new String[8];
+        //String[] parameters = new String[7];
             Map<String, Object> params = new LinkedHashMap<>();
             parameters[0]= "insertRecord";
             parameters[1]=  recName;
@@ -268,33 +375,10 @@ public class CreateRecordActivity extends AppCompatActivity {
             parameters[4]= recLure;
             parameters[5]= recWeather;
             parameters[6]= recSpecies;
+            parameters[7]= encodedBytes;
             networkConnection c = new networkConnection();
             c.execute(parameters);
-            // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
 
-//            StringBuilder postData = new StringBuilder();
-//            for (Map.Entry<String, Object> param : params.entrySet()) {
-//                if (postData.length() != 0) postData.append('&');
-//                postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-//                postData.append('=');
-//                postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-//            }
-//            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-//
-//            conn = (HttpURLConnection) url.openConnection();
-//            conn.setRequestMethod("POST");
-//            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//            conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-//            conn.setDoOutput(true);
-//            conn.getOutputStream().write(postDataBytes);
-//
-//            Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-//
-//            for (int c; (c = in.read()) >= 0; )
-//                System.out.print((char) c);
-//        } catch (Exception e) {
-//            System.out.println("exception in createRecord: " + e.getMessage());
-//        }
     }
 
     @Override
