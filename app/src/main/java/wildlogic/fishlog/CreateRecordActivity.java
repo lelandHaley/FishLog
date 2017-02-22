@@ -358,7 +358,7 @@ public class CreateRecordActivity extends AppCompatActivity {
        Bitmap recordPic = ((BitmapDrawable)img.getDrawable()).getBitmap();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        recordPic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+       // recordPic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream .toByteArray();
 
         String encodedBytes = Base64.encodeToString(byteArray, Base64.DEFAULT);

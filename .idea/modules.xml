@@ -5,6 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/FishLog.iml" filepath="$PROJECT_DIR$/FishLog.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/httpclient-4.5.3/httpclient-4.5.3.iml" filepath="$PROJECT_DIR$/httpclient-4.5.3/httpclient-4.5.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpclient-cache-4.5.3/httpclient-cache-4.5.3.iml" filepath="$PROJECT_DIR$/httpclient-cache-4.5.3/httpclient-cache-4.5.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpclient-win-4.5.3/httpclient-win-4.5.3.iml" filepath="$PROJECT_DIR$/httpclient-win-4.5.3/httpclient-win-4.5.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpcore-4.4.6/httpcore-4.4.6.iml" filepath="$PROJECT_DIR$/httpcore-4.4.6/httpcore-4.4.6.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpmime-4.5.3/httpmime-4.5.3.iml" filepath="$PROJECT_DIR$/httpmime-4.5.3/httpmime-4.5.3.iml" />
       <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
       <module fileurl="file://$PROJECT_DIR$/mysql-connector-java-commercial-5.1.7-bin/mysql-connector-java-commercial-5.1.7-bin.iml" filepath="$PROJECT_DIR$/mysql-connector-java-commercial-5.1.7-bin/mysql-connector-java-commercial-5.1.7-bin.iml" />
     </modules>
