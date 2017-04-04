@@ -1,0 +1,113 @@
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision )
++++ app/build.gradle	(revision d146b46fb0644c711e4fd1b2c396d04b2aa0313e)
+@@ -1,58 +1,40 @@
+ apply plugin: 'com.android.application'
+ 
+ android {
+-    signingConfigs {
+-        config {
+-            keyAlias 'alias'
+-            keyPassword 'password'
+-        }
+-        packagingOptions {
+-            exclude 'META-INF/DEPENDENCIES'
+-            exclude 'META-INF/NOTICE'
+-            exclude 'META-INF/LICENSE'
+-            exclude 'META-INF/LICENSE.txt'
+-            exclude 'META-INF/NOTICE.txt'
+-        }
+-
+-    }
+     compileSdkVersion 24
+     buildToolsVersion "24.0.2"
+     useLibrary 'org.apache.http.legacy'
++
+     defaultConfig {
+         applicationId "wildlogic.fishlog"
+         minSdkVersion 15
+         targetSdkVersion 24
+         versionCode 1
+         versionName "1.0"
+-        multiDexEnabled true
+     }
+     buildTypes {
+         release {
+             minifyEnabled false
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+-    }
++        }
+         debug {
+             debuggable true
+         }
+     }
+-
+-    dexOptions {
+-        javaMaxHeapSize "4g" //specify the heap size for the dex process
+-    }
++}
+-}
+ 
+ dependencies {
+     compile fileTree(dir: 'libs', include: ['*.jar'])
+     testCompile 'junit:junit:4.12'
+     compile project(':mysql-connector-java-commercial-5.1.7-bin')
++
+     compile 'com.android.support:appcompat-v7:24.2.0'
+     compile 'com.google.android.gms:play-services-appindexing:8.1.0'
+     compile 'com.google.android.gms:play-services:9.8.0'
+-    //compile 'org.apache.httpcomponents:httpcore:4.4.6'
++    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+-    //  compile 'org.apache.httpcomponents:httpclient:4.5'
+-    //  compile 'org.apache.httpcomponents:httpmime:4.5.3'
++  //  compile 'org.apache.httpcomponents:httpclient:4.5'
++  //  compile 'org.apache.httpcomponents:httpmime:4.5.3'
+     compile 'com.google.android.gms:play-services-ads:9.8.0'
+     compile 'com.google.android.gms:play-services-auth:9.8.0'
+     compile 'com.google.android.gms:play-services-gcm:9.8.0'
+-    //compile 'com.android.support:multidex:1.0.0'
+ }
+Index: gradle.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- gradle.properties	(revision )
++++ gradle.properties	(revision d146b46fb0644c711e4fd1b2c396d04b2aa0313e)
+@@ -10,7 +10,7 @@
+ # Specifies the JVM arguments used for the daemon process.
+ # The setting is particularly useful for tweaking memory settings.
+ # Default value: -Xmx10248m -XX:MaxPermSize=256m
+- org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
++# org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+ 
+ # When configured, Gradle will run in incubating parallel mode.
+ # This option should only be used with decoupled projects. More details, visit
+\ No newline at end of file
+Index: app/proguard-rules.pro
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/proguard-rules.pro	(revision )
++++ app/proguard-rules.pro	(revision d146b46fb0644c711e4fd1b2c396d04b2aa0313e)
+@@ -8,7 +8,7 @@
+ #   http://developer.android.com/guide/developing/tools/proguard.html
+ 
+ # Add any project specific keep options here:
+--keepattributes EnclosingMethod
++
+ # If your project uses WebView with JS, uncomment the following
+ # and specify the fully qualified class name to the JavaScript interface
+ # class:
+Index: httpclient-4.5.3/build.gradle
+===================================================================
+--- httpclient-4.5.3/build.gradle	(revision d146b46fb0644c711e4fd1b2c396d04b2aa0313e)
++++ httpclient-4.5.3/build.gradle	(revision d146b46fb0644c711e4fd1b2c396d04b2aa0313e)
+@@ -0,0 +1,1 @@
++
+\ No newline at end of file
