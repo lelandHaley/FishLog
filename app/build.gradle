@@ -13,6 +13,10 @@ android {
         versionName "1.0"
         multiDexEnabled true
     }
+    packagingOptions {
+        pickFirst 'META-INF/LICENSE'
+        pickFirst 'META-INF/DEPENDENCIES'
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -39,11 +43,12 @@ dependencies {
 
     //compile 'org.apache.httpcomponents:httpcore:4.4.6'
    // compile 'org.apache.httpcomponents:httpclient:4.5'
-  //  compile 'org.apache.httpcomponents:httpmime:4.5.3'
+    //compile 'org.apache.httpcomponents:httpmime:4.5.3'
 
     compile 'com.google.android.gms:play-services-ads:9.8.0'
     compile 'com.google.android.gms:play-services-auth:9.8.0'
     compile 'com.google.android.gms:play-services-gcm:9.8.0'
 
+    compile 'com.android.support:multidex:1.0.1'
     //compile 'com.android.support:multidex:1.0.0'
 }
