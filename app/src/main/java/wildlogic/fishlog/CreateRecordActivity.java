@@ -35,7 +35,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedInputStream;
@@ -91,6 +95,68 @@ public class CreateRecordActivity extends AppCompatActivity {
     //private MapView mapView;
     private class networkConnection extends AsyncTask<String, Void, String> {
 
+//        @Override
+//        protected String doInBackground(String[] params) {
+////            return "returnvalue";
+////        }
+////
+////
+////        protected String insertRecord(String[] params) {
+//
+//            System.out.println("in networkConnection.insertRecord");
+//            //Connection con = null;
+//            HttpURLConnection conn = null;
+//            HttpClient httpClient = new DefaultHttpClient();
+//            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
+//            try {
+//                URL url = new URL(urlString);
+//                Map<String, Object> params1 = new LinkedHashMap<>();
+//                params1.put("func", "insertRecord");
+//                params1.put("recName", params[1]);
+//                params1.put("recLat", params[2]);
+//                params1.put("recLon", params[3]);
+//                params1.put("recLure", params[4]);
+//                params1.put("recWeather", params[5]);
+//                params1.put("recSpecies", params[6]);
+//                params1.put("recImage", recordImage);
+//                params1.put("recImage", params[7]);
+//
+//
+////                params1.put("function", "insertRecord");
+////                params1.put("recName", recName);
+////                params1.put("recLat", recLat);
+////                params1.put("recLon", recLon);
+////                params1.put("recLure", recLure);
+////                params1.put("recWeather", recWeather);
+////                params1.put("recSpecies", recSpecies);
+//                // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
+//
+//                StringBuilder postData = new StringBuilder();
+//                for (Map.Entry<String, Object> param : params1.entrySet()) {
+//                    if (postData.length() != 0) postData.append('&');
+//                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+//                    postData.append('=');
+//                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+//                }
+//                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+//
+//                conn = (HttpURLConnection) url.openConnection();
+//                conn.setRequestMethod("POST");
+//                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+//                conn.setDoOutput(true);
+//                conn.getOutputStream().write(postDataBytes);
+//                //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+//                int status = conn.getResponseCode();
+////                for (int c; (c = in.read()) >= 0; )
+////                    System.out.print((char) c);
+//                System.out.println("Response code is " + status);
+//            } catch (Exception e) {
+//                System.out.println("exception in createRecord: " + e.getMessage());
+//        }
+//            return "some message";
+//        }
+
         @Override
         protected String doInBackground(String[] params) {
 //            return "returnvalue";
@@ -99,23 +165,94 @@ public class CreateRecordActivity extends AppCompatActivity {
 //
 //        protected String insertRecord(String[] params) {
 
-            System.out.println("in networkConnection.insertRecord");
-            //Connection con = null;
-            HttpURLConnection conn = null;
-            HttpClient httpClient = new DefaultHttpClient();
-            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
+//            System.out.println("in networkConnection.insertRecord");
+//            //Connection con = null;
+//            HttpURLConnection conn = null;
+//            HttpClient httpClient = new DefaultHttpClient();
+//            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
+//            HttpClient client = new DefaultHttpClient();
+//            HttpPost postMethod = new HttpPost("http://localhost/Upload/index.php");
+//            File file = new File(filePath);
+//            MultipartEntity entity = new MultipartEntity();
+//            FileBody contentFile = new FileBody(file);
+//            entity.addPart("userfile",contentFile);
+//            StringBody contentString = new StringBody("This is contentString");
+//            entity.addPart("contentString",contentString);
+//
+//            postMethod.setEntity(entity);
+//            client.execute(postMethod);
+
+            HttpPost httppost = new HttpPost(urlString);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+/* example for setting a HttpMultipartMode */
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+
+/* example for adding an image part */
+            FileBody fileBody = new FileBody(new File(recordImage.toString())); //image should be a String
+            //builder.addPart("my_file", fileBody);
+
             try {
-                URL url = new URL(urlString);
-                Map<String, Object> params1 = new LinkedHashMap<>();
-                params1.put("func", "insertRecord");
-                params1.put("recName", params[1]);
-                params1.put("recLat", params[2]);
-                params1.put("recLon", params[3]);
-                params1.put("recLure", params[4]);
-                params1.put("recWeather", params[5]);
-                params1.put("recSpecies", params[6]);
-                //  params1.put("recImage", recordImage);
-                params1.put("recImage", params[7]);
+                StringBody contentString = new StringBody("This is contentString");
+            }catch(Exception e){
+                System.out.println("Exception " + e.getMessage());
+            }
+
+
+           // builder.addTextBody("func", "insertRecord");
+           // builder.addTextBody("recName", params[1]);
+           // builder.addTextBody("recLat", params[2]);
+           // builder.addTextBody("recLon", params[3]);
+           // builder.addTextBody("recLure", params[4]);
+           // builder.addTextBody("recWeather", params[5]);
+           // builder.addTextBody("recSpecies", params[6]);
+            builder.addPart("recImage", fileBody);
+            //builder.addTextBody("recImage", params[7]);
+
+            HttpEntity entity = builder.build();
+            httppost.setEntity(entity);
+            CloseableHttpClient httpclient = HttpClients.createDefault();
+            try {
+                httpclient.execute(httppost);
+            }catch(Exception e){
+                System.out.println("Exception: " + e.getMessage());
+            }
+
+//            HttpPost postMethod = new HttpPost(urlString);
+//            HttpClient client = new DefaultHttpClient();
+//            //File file = new File(filePath);
+//           // MultipartEntity entity = new MultipartEntity();
+//            //F//ileBody contentFile = new FileBody(file);
+//           // entity.addPart("userfile",contentFile);
+//            try {
+//            StringBody contentString = new StringBody("This is contentString");
+//                builder.addPart("contentString",contentString);
+//
+//                HttpEntity entity = builder.build();
+//
+//                client.execute(postMethod);
+//            }catch(Exception e){
+//                System.out.println();
+//            }
+
+
+
+
+
+
+          //  try {
+//                URL url = new URL(urlString);
+//                Map<String, Object> params1 = new LinkedHashMap<>();
+//                params1.put("func", "insertRecord");
+//                params1.put("recName", params[1]);
+//                params1.put("recLat", params[2]);
+//                params1.put("recLon", params[3]);
+//                params1.put("recLure", params[4]);
+//                params1.put("recWeather", params[5]);
+//                params1.put("recSpecies", params[6]);
+//                params1.put("recImage", recordImage);
+//                params1.put("recImage", params[7]);
 
 
 //                params1.put("function", "insertRecord");
@@ -126,34 +263,68 @@ public class CreateRecordActivity extends AppCompatActivity {
 //                params1.put("recWeather", recWeather);
 //                params1.put("recSpecies", recSpecies);
                 // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
-
-                StringBuilder postData = new StringBuilder();
-                for (Map.Entry<String, Object> param : params1.entrySet()) {
-                    if (postData.length() != 0) postData.append('&');
-                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-                    postData.append('=');
-                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-                }
-                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-
-                // conn = (HttpURLConnection) url.openConnection();
-                //conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-                conn.setDoOutput(true);
-                conn.getOutputStream().write(postDataBytes);
-                //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-                int status = conn.getResponseCode();
-//                for (int c; (c = in.read()) >= 0; )
-//                    System.out.print((char) c);
-                System.out.println("Response code is " + status);
-            } catch (Exception e) {
-                System.out.println("exception in createRecord: " + e.getMessage());
-            }
+//
+//                StringBuilder postData = new StringBuilder();
+//                for (Map.Entry<String, Object> param : params1.entrySet()) {
+//                    if (postData.length() != 0) postData.append('&');
+//                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+//                    postData.append('=');
+//                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+//                }
+//                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+//
+//                conn = (HttpURLConnection) url.openConnection();
+//                conn.setRequestMethod("POST");
+//                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+//                conn.setDoOutput(true);
+//                conn.getOutputStream().write(postDataBytes);
+//                //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+//                int status = conn.getResponseCode();
+////                for (int c; (c = in.read()) >= 0; )
+////                    System.out.print((char) c);
+//                System.out.println("Response code is " + status);
+//            } catch (Exception e) {
+//                System.out.println("exception in createRecord: " + e.getMessage());
+//            }
             return "some message";
         }
 
 
+
+
+
+        public void executeMultipartPost() throws Exception {
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                recordImage.compress(Bitmap.CompressFormat.JPEG, 75, bos);
+                byte[] data = bos.toByteArray();
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost postRequest = new HttpPost(
+                        "http://10.0.2.2/cfc/iphoneWebservice.cfc?returnformat=json&amp;method=testUpload");
+                ByteArrayBody bab = new ByteArrayBody(data, "forest.jpg");
+                // File file= new File("/mnt/sdcard/forest.png");
+                // FileBody bin = new FileBody(file);
+                MultipartEntity reqEntity = new MultipartEntity(
+                        HttpMultipartMode.BROWSER_COMPATIBLE);
+                reqEntity.addPart("uploaded", bab);
+                reqEntity.addPart("photoCaption", new StringBody("sfsdfsdf"));
+                postRequest.setEntity(reqEntity);
+                HttpResponse response = httpClient.execute(postRequest);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        response.getEntity().getContent(), "UTF-8"));
+                String sResponse;
+                StringBuilder s = new StringBuilder();
+
+                while ((sResponse = reader.readLine()) != null) {
+                    s = s.append(sResponse);
+                }
+                System.out.println("Response: " + s);
+            } catch (Exception e) {
+                // handle exception here
+                System.out.println("exception in createRecord: " + e.getMessage());
+            }
+        }
 
 
 //
