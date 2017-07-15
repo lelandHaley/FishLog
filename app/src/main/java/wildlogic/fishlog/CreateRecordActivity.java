@@ -1,14 +1,22 @@
 package wildlogic.fishlog;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -25,11 +33,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.survivingwithandroid.weather.lib.WeatherClient;
+import com.survivingwithandroid.weather.lib.WeatherConfig;
+import com.survivingwithandroid.weather.lib.client.volley.WeatherClientDefault;
 
 
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -41,6 +57,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -75,10 +92,10 @@ import java.util.List;
 import java.util.Map;
 
 
-public class CreateRecordActivity extends AppCompatActivity {
+public class CreateRecordActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     //String url="jdbc:mysql://localhost:3306/DBNAME";
     //private String urlString="jdbc:mysql://192.168.0.6:8889/Fishlog";
-    private String urlString="http://192.168.0.6:8080/FishLogServlet/DBConectionServlet";
+    private String urlString = "http://192.168.0.6:8080/FishLogServlet/DBConectionServlet";
     //private String urlString = "jdbc:mysql://localhost:8889/Fishlog";
     private String driver = "org.gjt.mm.mysql.Driver";
     private String username = "uroot";//user must have read-write permission to Database
@@ -86,14 +103,56 @@ public class CreateRecordActivity extends AppCompatActivity {
     String recLat, recLon;
     Bitmap recordImage = null;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    WeatherClient wClient = WeatherClientDefault.getInstance();
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+
+
+//    wClient.init(this.Context);
+//    WeatherConfig config = new WeatherConfig();
+//    config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
+//    config.lang = "en"; // If you want to use english
+//    config.maxResult = 5; // Max number of cities retrieved
+//    config.numDays = 6; // Max num of days in the forecast
+
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
+    //private GoogleApiClient client;
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        recLat = Double.toString(location.getLatitude());
+        recLon = Double.toString(location.getLongitude());
+
+    }
+
     //private MapView mapView;
     private class networkConnection extends AsyncTask<String, Void, String> {
+
+                //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
+               // https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/37.8267,-122.4233
+                private static final String OPEN_WEATHER_MAP_URL =
+        "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
+
+        private static final String OPEN_WEATHER_MAP_API = "====== YOUR OPEN WEATHER MAP API ======";
 
 //        @Override
 //        protected String doInBackground(String[] params) {
@@ -157,6 +216,49 @@ public class CreateRecordActivity extends AppCompatActivity {
 //            return "some message";
 //        }
 
+        public JSONObject getWeatherJSON(String lat, String lon) {
+            JSONObject data = null;
+            try {
+                URL url = new URL(String.format(OPEN_WEATHER_MAP_URL, lat, lon));
+                HttpURLConnection connection =
+                        (HttpURLConnection) url.openConnection();
+
+                //connection.addRequestProperty("x-api-key", OPEN_WEATHER_MAP_API);
+                //connection.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+                //connection.setRequestProperty("Accept","*/*");
+
+                connection.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
+                connection.setRequestProperty("Accept","*/*");
+                connection.setDoOutput(false);
+
+                int status = connection.getResponseCode();
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream()));
+
+                StringBuffer json = new StringBuffer(1024);
+                String tmp = "";
+                while ((tmp = reader.readLine()) != null)
+                    json.append(tmp).append("\n");
+                reader.close();
+
+                 data = new JSONObject(json.toString());
+
+                // This value will be 404 if the request was not
+                // successful
+//                if (data.getInt("cod") != 200) {
+                if (status != 200) {
+                    return null;
+                }
+
+                return data;
+            } catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+            return data;
+        }
+
+
         @Override
         protected String doInBackground(String[] params) {
 //            return "returnvalue";
@@ -195,29 +297,47 @@ public class CreateRecordActivity extends AppCompatActivity {
 
             try {
                 StringBody contentString = new StringBody("This is contentString");
-            }catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("Exception " + e.getMessage());
             }
 
 
-           // builder.addTextBody("func", "insertRecord");
-           // builder.addTextBody("recName", params[1]);
-           // builder.addTextBody("recLat", params[2]);
-           // builder.addTextBody("recLon", params[3]);
-           // builder.addTextBody("recLure", params[4]);
-           // builder.addTextBody("recWeather", params[5]);
-           // builder.addTextBody("recSpecies", params[6]);
+            // builder.addTextBody("func", "insertRecord");
+            // builder.addTextBody("recName", params[1]);
+            // builder.addTextBody("recLat", params[2]);
+            // builder.addTextBody("recLon", params[3]);
+            // builder.addTextBody("recLure", params[4]);
+            // builder.addTextBody("recWeather", params[5]);
+            // builder.addTextBody("recSpecies", params[6]);
             builder.addPart("recImage", fileBody);
             //builder.addTextBody("recImage", params[7]);
 
-            HttpEntity entity = builder.build();
-            httppost.setEntity(entity);
-            CloseableHttpClient httpclient = HttpClients.createDefault();
+            // HttpEntity entity = builder.build();
+            // httppost.setEntity(entity);
+            // CloseableHttpClient httpclient = HttpClients.createDefault();
+
+
+            JSONObject jsonWeather = null;
+            JSONObject currentCond = null;
+            String currTemp = "";
+            String summary = "";
             try {
-                httpclient.execute(httppost);
-            }catch(Exception e){
+                jsonWeather = getWeatherJSON(params[2], params[3]);
+                currentCond = jsonWeather.getJSONObject("currently");
+                currTemp = currentCond.getString("temperature");
+                summary = currentCond.getString("summary");
+
+
+            } catch (Exception e) {
+                Log.d("Error", "Cannot process JSON results", e);
+            }
+
+            try {
+                //     httpclient.execute(httppost);
+            } catch (Exception e) {
                 System.out.println("Exception: " + e.getMessage());
             }
+
 
 //            HttpPost postMethod = new HttpPost(urlString);
 //            HttpClient client = new DefaultHttpClient();
@@ -237,11 +357,7 @@ public class CreateRecordActivity extends AppCompatActivity {
 //            }
 
 
-
-
-
-
-          //  try {
+            //  try {
 //                URL url = new URL(urlString);
 //                Map<String, Object> params1 = new LinkedHashMap<>();
 //                params1.put("func", "insertRecord");
@@ -262,7 +378,7 @@ public class CreateRecordActivity extends AppCompatActivity {
 //                params1.put("recLure", recLure);
 //                params1.put("recWeather", recWeather);
 //                params1.put("recSpecies", recSpecies);
-                // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
+            // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
 //
 //                StringBuilder postData = new StringBuilder();
 //                for (Map.Entry<String, Object> param : params1.entrySet()) {
@@ -289,9 +405,6 @@ public class CreateRecordActivity extends AppCompatActivity {
 //            }
             return "some message";
         }
-
-
-
 
 
         public void executeMultipartPost() throws Exception {
@@ -327,83 +440,6 @@ public class CreateRecordActivity extends AppCompatActivity {
         }
 
 
-//
-//
-//                conn = (HttpURLConnection) url.openConnection();
-//                Bitmap bitmap = recordImage;
-//                String filename = "filename.png";
-//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
-//                ContentBody contentPart = new ByteArrayBody(bos.toByteArray(), filename);
-//                //MultipartEntityBuilder b = new MultipartEntityBuilder();
-//                MultipartEntityBuilder reqEntity;
-//                reqEntity = MultipartEntityBuilder.create();
-//                //MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-//                reqEntity.addPart("picture", contentPart);
-//                HttpEntity ent = reqEntity.build();
-//               // HttpEntity httpEntity = multipartBuilder.build();
-//                httpPost.setEntity(ent);  // Error line
-//                HttpResponse response = httpClient.execute(httpPost);
-//                System.out.println(EntityUtils.toString(response.getEntity()));
-//                //Utility.showLog(TAG, EntityUtils.toString(response.getEntity()));
-//
-//                //String response = multipost("http://server.com", ent);
-//             //   String response = multipost("http://server.com", reqEntity);
-//
-//
-//
-//                conn.setReadTimeout(10000);
-//                conn.setConnectTimeout(15000);
-//                conn.setRequestMethod("POST");
-//                conn.setUseCaches(false);
-//                conn.setDoInput(true);
-//                conn.setDoOutput(true);
-//
-//                //conn.setRequestProperty("Connection", "Keep-Alive");
-//                //conn.addRequestProperty("Content-length", );
-//
-//                //conn.addRequestProperty("Content-length", reqEntity.getContentLength()+"");
-//               // conn.addRequestProperty(reqEntity.getContentType().getName(), reqEntity.getContentType().getValue());
-//
-//                OutputStream os = conn.getOutputStream();
-//                ent.writeTo(conn.getOutputStream());
-//                //reqEntity.writeTo(conn.getOutputStream());
-//                os.close();
-//                conn.connect();
-//
-//                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-//                    return readStream(conn.getInputStream());
-//                }
-//
-//            } catch (Exception e) {
-//                //Log.e(TAG,"");
-//                System.out.println("multipart post error " + e + "(" + urlString + ")");
-//            }
-//            return null;
-//        }
-//
-////        private String readStream(InputStream in) {
-////            BufferedReader reader = null;
-////            StringBuilder builder = new StringBuilder();
-////            try {
-////                reader = new BufferedReader(new InputStreamReader(in));
-////                String line = "";
-////                while ((line = reader.readLine()) != null) {
-////                    builder.append(line);
-////                }
-////            } catch (IOException e) {
-////                e.printStackTrace();
-////            } finally {
-////                if (reader != null) {
-////                    try {
-////                        reader.close();
-////                    } catch (IOException e) {
-////                        e.printStackTrace();
-////                    }
-////                }
-////            }
-////            return builder.toString();
-////        }
 
 
         @Override
@@ -413,10 +449,26 @@ public class CreateRecordActivity extends AppCompatActivity {
     }
 
     @Override
+    public Context getApplicationContext() {
+        return super.getApplicationContext();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_record);
-
+//        if (mGoogleApiClient == null) {
+//            mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                    .addConnectionCallbacks(this)
+//                    .addOnConnectionFailedListener(this)
+//                    .addApi(LocationServices.API)
+//                    .build();
+//        }
+//        if (mGoogleApiClient != null) {
+//            mGoogleApiClient.connect();
+//        }
+//        System.out.println(mGoogleApiClient.toString());
+//        this.getLocation();
         //Intent intent = getIntent();
         // Bundle extras = getIntent().getExtras().getBundle("pictureData");
         // Bitmap imageBitmap = (Bitmap) extras.get("data");
@@ -459,7 +511,7 @@ public class CreateRecordActivity extends AppCompatActivity {
 //        });
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        //client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     // Add the mapView lifecycle to the activity's lifecycle methods
@@ -501,6 +553,8 @@ public class CreateRecordActivity extends AppCompatActivity {
         }
 
     }
+
+
 
     public void createRecord(View view) {
 
@@ -558,7 +612,7 @@ public class CreateRecordActivity extends AppCompatActivity {
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
+       // mGoogleApiClient.connect();
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
                 "CreateRecord Page", // TODO: Define a title for the content shown.
@@ -569,7 +623,7 @@ public class CreateRecordActivity extends AppCompatActivity {
                 // TODO: Make sure this auto-generated app URL is correct.
                 Uri.parse("android-app://wildlogic.fishlog/http/host/path")
         );
-        AppIndex.AppIndexApi.start(client, viewAction);
+       // AppIndex.AppIndexApi.start(mGoogleApiClient, viewAction);
     }
 
     @Override
@@ -588,7 +642,7 @@ public class CreateRecordActivity extends AppCompatActivity {
                 // TODO: Make sure this auto-generated app URL is correct.
                 Uri.parse("android-app://wildlogic.fishlog/http/host/path")
         );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
+        AppIndex.AppIndexApi.end(mGoogleApiClient, viewAction);
+       // mGoogleApiClient.disconnect();
     }
 }

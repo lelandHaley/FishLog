@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="wildlogic.fishlog">
 
     <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18" /> -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+
+    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="24" />
 
     <application
         android:allowBackup="true"
@@ -19,7 +24,8 @@
         android:label="@string/title"
         android:name="android.support.multidex.MultiDexApplication"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:label,android:icon">
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="your API key"/>
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -45,6 +51,7 @@
 
         <!-- <activity android:name=".DisplayMessageActivity"></activity> -->
         <activity android:name=".CreateRecordActivity"></activity>
+        <activity android:name=".GetWeatherActivity"></activity>
     </application>
 
 </manifest>
