@@ -6,11 +6,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -34,6 +37,7 @@ public class GetWeatherActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
     private JSONObject weatherJson;
+    static final int REQUEST_BACK_TO_MAIN = 1;
 
     private class WeatherAPIClient extends AsyncTask<String, Void, String> {
 
@@ -110,6 +114,31 @@ public class GetWeatherActivity extends AppCompatActivity {
 
     private void setWeatherDate(JSONObject wData) {
         this.weatherJson = wData;
+        TextView currCondField = (TextView) findViewById(R.id.cur_cond_field);
+        TextView currTempField = (TextView) findViewById(R.id.current_temperature_field);
+        TextView cloudCoverField = (TextView) findViewById(R.id.cloud_cover_field);
+        TextView windSpeedField = (TextView) findViewById(R.id.wind_speed_field);
+        TextView precipChanceField = (TextView) findViewById(R.id.precip_chance_field);
+
+        //cityField.setText(this.weatherJson.getString());
+        try {
+
+            JSONObject currWeatherObj = this.weatherJson.getJSONObject("currently");
+            String t = currWeatherObj.getString("summary");
+            currCondField.setText(currWeatherObj.getString("summary"));
+            currTempField.setText(currWeatherObj.getString("temperature") + " °F");
+            cloudCoverField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("cloudCover")) * 100) + " %");
+            windSpeedField.setText(currWeatherObj.getString("windSpeed") + "Miles per Hour");
+            precipChanceField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("precipProbability")) * 100) + " %");
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+
     }
 
 
@@ -147,6 +176,14 @@ public class GetWeatherActivity extends AppCompatActivity {
 
     }
 
+    public void goBackToMain(View view){
+//        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+//        //i.putExtra("pictureData", bitmap);
+//        startActivityForResult(i, REQUEST_BACK_TO_MAIN);
+        finish();
+
+    }
+
 
 
     @Override
@@ -154,21 +191,21 @@ public class GetWeatherActivity extends AppCompatActivity {
         super.onStart();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
+        //client.connect();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "GetWeather Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
+//        Action viewAction = Action.newAction(
+//                Action.TYPE_VIEW, // TODO: choose an action type.
+//                "GetWeather Page", // TODO: Define a title for the content shown.
+//                // TODO: If you have web page content that matches this app activity's content,
+//                // make sure this auto-generated web page URL is correct.
+//                // Otherwise, set the URL to null.
+//                Uri.parse("http://host/path"),
+//                // TODO: Make sure this auto-generated app URL is correct.
+//                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
+//        );
+//        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
@@ -176,20 +213,22 @@ public class GetWeatherActivity extends AppCompatActivity {
         super.onStop();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "GetWeather Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
+//        Action viewAction = Action.newAction(
+//                Action.TYPE_VIEW, // TODO: choose an action type.
+//                "GetWeather Page", // TODO: Define a title for the content shown.
+//                // TODO: If you have web page content that matches this app activity's content,
+//                // make sure this auto-generated web page URL is correct.
+//                // Otherwise, set the URL to null.
+//                Uri.parse("http://host/path"),
+//                // TODO: Make sure this auto-generated app URL is correct.
+//                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
+//        );
+//        AppIndex.AppIndexApi.end(client, viewAction);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.disconnect();
+        if(client != null) {
+            client.disconnect();
+        }
     }
 }

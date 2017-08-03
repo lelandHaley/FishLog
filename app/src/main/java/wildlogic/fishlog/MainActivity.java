@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         super.onRestoreInstanceState(savedInstanceState);
-        System.out.println(mCurrentPhotoPath);
+        //System.out.println(mCurrentPhotoPath);
         //imageView = (ImageView) findViewById(R.id.imageView1);
     }
 }

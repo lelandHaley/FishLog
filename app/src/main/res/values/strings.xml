@@ -3,8 +3,14 @@
     <string name="welcome_banner">Welcome To Your Fish Log</string>
     <string name="create_record_button_text">Save Fish</string>
     <string name="save_record">Record Fish</string>
+    <string name="back">Back</string>
     <string name="get_weather">Get Weather</string>
     <string name="lure_used">Lure Used</string>
+    <string name="summary">Weather Summary</string>
+    <string name="curr_temp">Current Temperature</string>
+    <string name="cloud_cover">Cloud Cover Percentage</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="precip_chance">Precipitation Chance</string>
     <string name="weather_conditions">Weather Conditions</string>
     <string name="cur_weather_conds">Current Weather Conditions</string>
     <!--<string name="save_record">Record Fish</string>-->
