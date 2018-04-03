@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <!--<TextView-->
+        <!--android:id="@+id/loginBanner"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:text="@string/login_banner"-->
+        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/loginUsername"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:text="@string/username"-->
+        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
+
+    <EditText android:id="@+id/loginUsername"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:hint="@string/username"
+        android:layout_marginBottom="10dip"/>
+
+    <EditText android:id="@+id/loginPassword"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loginUsername"
+        android:layout_centerHorizontal="true"
+        android:inputType="textPassword"
+        android:hint="@string/password"
+        android:layout_marginBottom="10dip"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loginPassword"
+        android:text="@string/log_in_button_text"
+        android:id="@+id/logInButton"
+        android:onClick="logIn"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/or_placeholder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logInButton"
+        android:layout_centerHorizontal="true"
+        android:text="@string/or"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/or_placeholder"
+        android:text="@string/register_button_text"
+        android:id="@+id/registerButton"
+        android:onClick="navigeteToNewUserView"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"/>
+
+
+</RelativeLayout>

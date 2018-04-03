@@ -73,10 +73,16 @@
                     android:layout_height="wrap_content"
                     android:text="@string/weather_conditions"
                     />
-                <EditText android:id="@+id/weatherField"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dip"/>
+
+        <Spinner
+            android:id="@+id/weatherSpinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"/>
+                <!--<EditText android:id="@+id/weatherField"-->
+                    <!--android:layout_width="fill_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginBottom="10dip"/>-->
 
         <!--<com.mapbox.mapboxsdk.maps.MapView-->
             <!--android:id="@+id/mapView"-->

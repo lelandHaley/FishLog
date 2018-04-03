@@ -12,11 +12,100 @@
     <string name="wind_speed">Wind Speed</string>
     <string name="precip_chance">Precipitation Chance</string>
     <string name="weather_conditions">Weather Conditions</string>
+    <string name="get_records">Get Fish Records</string>
     <string name="cur_weather_conds">Current Weather Conditions</string>
-    <!--<string name="save_record">Record Fish</string>-->
-    <!--<string name="save_record">Record Fish</string>-->
-    <!--<string name="save_record">Record Fish</string>-->
-    <!--<string name="save_record">Record Fish</string>-->
+    <string name="login_banner">Hello, Please Log In Or Create An Account</string>
+    <string name="username">Enter Username</string>
+    <string name="password">Enter Password</string>
+    <string name="or">Or</string>
+    <string name="log_in_button_text">Log In</string>
+    <string name="register_button_text">Sign Up</string>
+    <string name="register_username">Enter Desired Username</string>
+    <string name="register_password">Enter Desired Password</string>
+    <string name="register_confirm_password">Confirm Desired Password</string>
+    <string name="register_banner">Fill Out Fields Below To Sign Up</string>
+    <string name="registerConfirmPassword">Enter Email Address</string>
+    <string name="error">Error</string>
+    <string name="username_length_error">Username Must Be At Least 1 Character Long</string>
+    <string name="password_length_error">Password Must Be At Least 8 Character Long</string>
+    <string name="password_format_error">Password Must Contain At Least 8 Characters, At Least 1  Letter, And At Least 1 Number, And At Least 1 Special Character</string>
+    <string name="password_match_error">Passwords Do Not Match</string>
+    <string name="email_format_error">Invalid Email Format</string>
+    <string name="logout">Log Out</string>
+    <string name="filter_by">Filter By: </string>
+    <string name="filter_title">Search Your Recorded Fish Records</string>
+    <string name="manage_request">Manage Freinds</string>
+    <string name="filter_by_species">Filter By Species</string>
+    <string name="filter_by_conditions">Filter By Weather Conditions</string>
+    <string name="search">Search</string>
+    <string name="filter_near_me">Miles From Current Location</string>
+    <string name="filter_time_of_day">Enter Start And End Time (Enter Hours Only)</string>
+    <string name="near_me_text_placeholder">Enter Miles</string>
+    <string name="placehholder">placehholder</string>
+    <string name="display_name">Record Name</string>
+    <string name="display_lat">Latitude</string>
+    <string name="display_lon">Longitude</string>
+    <string name="display_lure">Lure Used</string>
+    <string name="display_weather">Weather Conditions</string>
+    <string name="display_species">Species of Fish</string>
+    <string name="display_time">Time Caught</string>
+    <string name="display_temp">Temperature</string>
+    <string name="display_user">Record Owner</string>
+    <string name="previous">&lt;&lt;&lt;</string>
+    <string name="next">&gt;&gt;&gt;</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="editing">Editing Record...</string>
+    <string name="manage_friends">Manage Friends</string>
+    <string name="poweredByText">Powered by Google Play Services and Darksky.net</string>
+    <string name="no_records">No Records To Display Using Current Filter</string>
+    <string name="send_request">Send Freind Request</string>
+    <string name="view_friends">View Friends</string>
+    <string name="remove_friend">Remove Friend</string>
+    <string name="enter_user">Send Freind Request To User:</string>
+    <string name="my_friends">My Friends</string>
+    <string name="pending_request">Users With Pending Requests</string>
+    <string name="delete_friend">Delete This Friend</string>
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+
+
+
+
+
+
+
 
 
     <string-array name="fish_species_array">
@@ -26,10 +115,30 @@
         <item>Smallmouth Bass</item>
         <item>Walleye/Sauger</item>
         <item>Brook Trout</item>
-        <item>Brown Trowt</item>
+        <item>Brown Trout</item>
         <item>Rainbow Trout</item>
         <item>Panfish</item>
     </string-array>
+
+    <string-array name="filter_records_by_attribute_array">
+        <item>No Filter</item>
+        <item>Species</item>
+        <item>Weather Conditions</item>
+        <item>Records Near Me</item>
+        <item>Time Of Day Recorded</item>
+    </string-array>
+
+    <string-array name="weather_display_array">
+        <item>Clear</item>
+        <item>Rain</item>
+        <item>Snow</item>
+        <item>Sleet</item>
+        <item>Wind</item>
+        <item>Fog</item>
+        <item>Cloudy</item>
+        <item>Partly Cloudy</item>
+    </string-array>
+
 </resources>
 
 

@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -51,7 +51,9 @@
 
         <!-- <activity android:name=".DisplayMessageActivity"></activity> -->
         <activity android:name=".CreateRecordActivity"></activity>
+        <activity android:name=".GetRecordsActivity"></activity>
         <activity android:name=".GetWeatherActivity"></activity>
+        <activity android:name=".ManageFriendsActivity"></activity>
     </application>
 
 </manifest>

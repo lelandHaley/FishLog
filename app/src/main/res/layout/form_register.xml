@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <EditText android:id="@+id/registerUsername"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:hint="@string/register_username"
+        android:layout_marginBottom="10dip"/>
+
+    <EditText android:id="@+id/registerPassword"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerUsername"
+        android:layout_centerHorizontal="true"
+        android:inputType="textPassword"
+        android:gravity="center"
+        android:hint="@string/register_password"
+        android:ellipsize="start"
+        android:layout_marginBottom="10dip"/>
+
+    <EditText android:id="@+id/registerConfirmPassword"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerPassword"
+        android:layout_centerHorizontal="true"
+        android:inputType="textPassword"
+        android:gravity="center"
+        android:hint="@string/register_confirm_password"
+        android:ellipsize="start"
+        android:layout_marginBottom="10dip"/>
+
+    <EditText android:id="@+id/registerEmail"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerConfirmPassword"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:hint="@string/registerConfirmPassword"
+        android:ellipsize="start"/>
+
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerEmail"
+        android:text="@string/register_button_text"
+        android:id="@+id/signUpButton"
+        android:onClick="registerNewUser"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

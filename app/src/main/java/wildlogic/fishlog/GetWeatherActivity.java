@@ -40,16 +40,16 @@ public class GetWeatherActivity extends AppCompatActivity {
     static final int REQUEST_BACK_TO_MAIN = 1;
 
     private class WeatherAPIClient extends AsyncTask<String, Void, String> {
-
+        private GetWeatherActivity parentActivity = null;
 
 
         @Override
         protected String doInBackground(String... params) {
             JSONObject wData = this.getWeatherJSON(params[0], params[1]);
-            parentActivity.setWeatherDate(wData);
+            parentActivity.setWeatherData(wData);
             return "SUCCESS";
         }
-        private GetWeatherActivity parentActivity = null;
+
 
         public WeatherAPIClient(GetWeatherActivity parentActivity) {
             this.parentActivity = parentActivity;
@@ -112,7 +112,7 @@ public class GetWeatherActivity extends AppCompatActivity {
 
     }
 
-    private void setWeatherDate(JSONObject wData) {
+    private void setWeatherData(JSONObject wData) {
         this.weatherJson = wData;
         TextView currCondField = (TextView) findViewById(R.id.cur_cond_field);
         TextView currTempField = (TextView) findViewById(R.id.current_temperature_field);
@@ -124,8 +124,7 @@ public class GetWeatherActivity extends AppCompatActivity {
         try {
 
             JSONObject currWeatherObj = this.weatherJson.getJSONObject("currently");
-            String t = currWeatherObj.getString("summary");
-            currCondField.setText(currWeatherObj.getString("summary"));
+            currCondField.setText(currWeatherObj.getString("icon"));
             currTempField.setText(currWeatherObj.getString("temperature") + " °F");
             cloudCoverField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("cloudCover")) * 100) + " %");
             windSpeedField.setText(currWeatherObj.getString("windSpeed") + "Miles per Hour");
@@ -135,9 +134,6 @@ public class GetWeatherActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
-
 
     }
 

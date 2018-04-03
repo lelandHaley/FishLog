@@ -26,6 +26,10 @@
     <!--android:focusableInTouchMode="true">-->
     <!--android:orientation="vertical"-->
 
+    <!--<Space-->
+        <!--android:id="@+id/nextAndSearchSpace"-->
+        <!--android:layout_width="30dp"-->
+        <!--android:layout_height="70dp" />-->
 
     <TextView
         android:layout_margin="10dp"
@@ -33,8 +37,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_centerHorizontal="true"
+        android:paddingTop="15dp"
+        android:paddingBottom="10dp"
         android:id="@+id/welcomeBanner"
-        android:textSize="32sp"
+        android:textSize="38sp"
         android:text="@string/welcome_banner" />
 
     <Button
@@ -47,7 +53,7 @@
         android:layout_below="@+id/welcomeBanner"
         android:layout_gravity="center"
         android:layout_centerHorizontal="true"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:height="70px"
         android:width="340px"
         android:layout_margin="10dp"/>
@@ -55,21 +61,106 @@
         <!--android:layout_alignParentLeft="true"-->
         <!--android:layout_alignParentStart="true" />-->
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/get_records"
+        android:layout_below="@+id/pictureButton"
+        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textSize="28sp"
+        android:height="70px"
+        android:width="340px"
+        android:id="@+id/getRecordButton"
+        android:onClick="getRecords"
+        android:layout_margin="10dp"/>
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/get_weather"
-        android:layout_below="@+id/pictureButton"
+        android:layout_below="@+id/getRecordButton"
         android:layout_gravity="center"
         android:layout_centerHorizontal="true"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:height="70px"
         android:width="340px"
         android:id="@+id/weatherbutton"
         android:onClick="getWeather"
         android:layout_margin="10dp"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/manage_friends"
+        android:layout_below="@+id/weatherbutton"
+        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textSize="28sp"
+        android:height="70px"
+        android:width="340px"
+        android:id="@+id/freindsButton"
+        android:onClick="manageFreinds"
+        android:layout_margin="10dp"/>
+
+    <!--<Button-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/manage_request"-->
+        <!--android:layout_below="@+id/weatherbutton"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:textSize="24sp"-->
+        <!--android:height="70px"-->
+        <!--android:width="340px"-->
+        <!--android:id="@+id/freindbutton"-->
+        <!--android:onClick="manageFreinds"-->
+        <!--android:layout_margin="10dp"/>-->
+
+
+    <RelativeLayout
+        android:id="@+id/InnerRelativeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/logoutButton"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:width="140px"
+            android:height="50px"
+            android:text="@string/logout"
+            android:textSize="20sp"
+            android:onClick="logout"/>
+
+        <Space
+            android:id="@+id/logoutAndCredentialsSpace"
+            android:layout_width="90dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/logoutButton"/>
+
+        <TextView
+            android:id="@+id/poweredByText"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/logoutAndCredentialsSpace"
+
+            android:text="@string/poweredByText"
+            android:textSize="20sp"/>
+        <!--android:layout_below="@+id/precip_chance_field"
+         android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:gravity="center"-->
+
+    </RelativeLayout>
         <!--android:layout_alignParentBottom="true"-->
         <!--android:layout_alignParentLeft="true"-->
         <!--android:layout_alignParentStart="true" />-->

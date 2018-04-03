@@ -1,7 +1,10 @@
 package wildlogic.fishlog;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +12,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.os.Looper;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -24,13 +30,22 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.SpinnerAdapter;
 
 
 //import com.android.internal.http.multipart.MultipartEntity;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
@@ -43,6 +58,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.gson.Gson;
 import com.survivingwithandroid.weather.lib.WeatherClient;
 import com.survivingwithandroid.weather.lib.WeatherConfig;
 import com.survivingwithandroid.weather.lib.client.volley.WeatherClientDefault;
@@ -55,22 +71,30 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Connection;
@@ -90,41 +114,39 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 
 public class CreateRecordActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     //String url="jdbc:mysql://localhost:3306/DBNAME";
     //private String urlString="jdbc:mysql://192.168.0.6:8889/Fishlog";
-    private String urlString = "http://192.168.0.6:8080/FishLogServlet/DBConectionServlet";
-    //private String urlString = "jdbc:mysql://localhost:8889/Fishlog";
+    //private String urlString = "http://192.168.1.2:8080/FishLogServlet/DBConectionServlet"; //home
+    private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
+    //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";//not sier what this one is
+   // private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet"; // virtual server
     private String driver = "org.gjt.mm.mysql.Driver";
-    private String username = "uroot";//user must have read-write permission to Database
-    private String password = "proot";//user password, possible security risk here
+    //private String username = "uroot";//user must have read-write permission to Database
+   // private String password = "proot";//user password, possible security risk here
+    private String username = "root";//virtual account
+    private String password = "root";
     String recLat, recLon;
+    String curUser = "", curLure = "", recordName = "";
     Bitmap recordImage = null;
+    String filePath = "";
     static final int REQUEST_IMAGE_CAPTURE = 1;
     WeatherClient wClient = WeatherClientDefault.getInstance();
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-
-
-//    wClient.init(this.Context);
-//    WeatherConfig config = new WeatherConfig();
-//    config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
-//    config.lang = "en"; // If you want to use english
-//    config.maxResult = 5; // Max number of cities retrieved
-//    config.numDays = 6; // Max num of days in the forecast
-
-
+    final Semaphore mutex = new Semaphore(0);
+    private static final String RECORD_SETTINGS = "lureSettings";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    //private GoogleApiClient client;
+    private GoogleApiClient client;
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
     }
 
     @Override
@@ -147,74 +169,17 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
     //private MapView mapView;
     private class networkConnection extends AsyncTask<String, Void, String> {
 
-                //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
-               // https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/37.8267,-122.4233
-                private static final String OPEN_WEATHER_MAP_URL =
-        "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
+        //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
+        // https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/37.8267,-122.4233
+        private static final String OPEN_WEATHER_MAP_URL =
+                "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
 
-        private static final String OPEN_WEATHER_MAP_API = "====== YOUR OPEN WEATHER MAP API ======";
+        HttpURLConnection conn = null;
+        private CreateRecordActivity parentActivity = null;
 
-//        @Override
-//        protected String doInBackground(String[] params) {
-////            return "returnvalue";
-////        }
-////
-////
-////        protected String insertRecord(String[] params) {
-//
-//            System.out.println("in networkConnection.insertRecord");
-//            //Connection con = null;
-//            HttpURLConnection conn = null;
-//            HttpClient httpClient = new DefaultHttpClient();
-//            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
-//            try {
-//                URL url = new URL(urlString);
-//                Map<String, Object> params1 = new LinkedHashMap<>();
-//                params1.put("func", "insertRecord");
-//                params1.put("recName", params[1]);
-//                params1.put("recLat", params[2]);
-//                params1.put("recLon", params[3]);
-//                params1.put("recLure", params[4]);
-//                params1.put("recWeather", params[5]);
-//                params1.put("recSpecies", params[6]);
-//                params1.put("recImage", recordImage);
-//                params1.put("recImage", params[7]);
-//
-//
-////                params1.put("function", "insertRecord");
-////                params1.put("recName", recName);
-////                params1.put("recLat", recLat);
-////                params1.put("recLon", recLon);
-////                params1.put("recLure", recLure);
-////                params1.put("recWeather", recWeather);
-////                params1.put("recSpecies", recSpecies);
-//                // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
-//
-//                StringBuilder postData = new StringBuilder();
-//                for (Map.Entry<String, Object> param : params1.entrySet()) {
-//                    if (postData.length() != 0) postData.append('&');
-//                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-//                    postData.append('=');
-//                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-//                }
-//                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-//
-//                conn = (HttpURLConnection) url.openConnection();
-//                conn.setRequestMethod("POST");
-//                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-//                conn.setDoOutput(true);
-//                conn.getOutputStream().write(postDataBytes);
-//                //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-//                int status = conn.getResponseCode();
-////                for (int c; (c = in.read()) >= 0; )
-////                    System.out.print((char) c);
-//                System.out.println("Response code is " + status);
-//            } catch (Exception e) {
-//                System.out.println("exception in createRecord: " + e.getMessage());
-//        }
-//            return "some message";
-//        }
+        public networkConnection(CreateRecordActivity parentActivity) {
+            this.parentActivity = parentActivity;
+        }
 
         public JSONObject getWeatherJSON(String lat, String lon) {
             JSONObject data = null;
@@ -223,12 +188,8 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 HttpURLConnection connection =
                         (HttpURLConnection) url.openConnection();
 
-                //connection.addRequestProperty("x-api-key", OPEN_WEATHER_MAP_API);
-                //connection.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
-                //connection.setRequestProperty("Accept","*/*");
-
-                connection.setRequestProperty("User-Agent","Mozilla/5.0 ( compatible ) ");
-                connection.setRequestProperty("Accept","*/*");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
+                connection.setRequestProperty("Accept", "*/*");
                 connection.setDoOutput(false);
 
                 int status = connection.getResponseCode();
@@ -242,7 +203,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                     json.append(tmp).append("\n");
                 reader.close();
 
-                 data = new JSONObject(json.toString());
+                data = new JSONObject(json.toString());
 
                 // This value will be 404 if the request was not
                 // successful
@@ -252,7 +213,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 }
 
                 return data;
-            } catch(Exception e){
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
             return data;
@@ -261,190 +222,160 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
         @Override
         protected String doInBackground(String[] params) {
-//            return "returnvalue";
-//        }
-//
-//
-//        protected String insertRecord(String[] params) {
+            String function = params[0];
+            if(function.equals("getWeather")){
+               JSONObject jsonWeather = getWeatherJSON(params[1], params[2]);
+                parentActivity.setWeatherSpinnerSelection(jsonWeather);
+                return "SUCCESS";
 
-//            System.out.println("in networkConnection.insertRecord");
-//            //Connection con = null;
-//            HttpURLConnection conn = null;
-//            HttpClient httpClient = new DefaultHttpClient();
-//            //HttpPost httpPost = new HttpPost(Utility.AddProductWS);
-//            HttpClient client = new DefaultHttpClient();
-//            HttpPost postMethod = new HttpPost("http://localhost/Upload/index.php");
-//            File file = new File(filePath);
-//            MultipartEntity entity = new MultipartEntity();
-//            FileBody contentFile = new FileBody(file);
-//            entity.addPart("userfile",contentFile);
-//            StringBody contentString = new StringBody("This is contentString");
-//            entity.addPart("contentString",contentString);
-//
-//            postMethod.setEntity(entity);
-//            client.execute(postMethod);
-
-            HttpPost httppost = new HttpPost(urlString);
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
-/* example for setting a HttpMultipartMode */
-            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            }else if(function.equals("insertRecord")) {
+                String response = "";
+                JSONObject jsonWeather = null;
+                JSONObject currentCond = null;
+                String currTemp = "";
+                String summary = "";
+                filePath = Environment.getExternalStorageDirectory() + File.separator + recordName;
+                try {
+                    jsonWeather = getWeatherJSON(params[2], params[3]);
+                    currentCond = jsonWeather.getJSONObject("currently");
+                    currTemp = currentCond.getString("temperature");
+                    summary = currentCond.getString("summary");
 
 
-/* example for adding an image part */
-            FileBody fileBody = new FileBody(new File(recordImage.toString())); //image should be a String
-            //builder.addPart("my_file", fileBody);
-
-            try {
-                StringBody contentString = new StringBody("This is contentString");
-            } catch (Exception e) {
-                System.out.println("Exception " + e.getMessage());
-            }
-
-
-            // builder.addTextBody("func", "insertRecord");
-            // builder.addTextBody("recName", params[1]);
-            // builder.addTextBody("recLat", params[2]);
-            // builder.addTextBody("recLon", params[3]);
-            // builder.addTextBody("recLure", params[4]);
-            // builder.addTextBody("recWeather", params[5]);
-            // builder.addTextBody("recSpecies", params[6]);
-            builder.addPart("recImage", fileBody);
-            //builder.addTextBody("recImage", params[7]);
-
-            // HttpEntity entity = builder.build();
-            // httppost.setEntity(entity);
-            // CloseableHttpClient httpclient = HttpClients.createDefault();
-
-
-            JSONObject jsonWeather = null;
-            JSONObject currentCond = null;
-            String currTemp = "";
-            String summary = "";
-            try {
-                jsonWeather = getWeatherJSON(params[2], params[3]);
-                currentCond = jsonWeather.getJSONObject("currently");
-                currTemp = currentCond.getString("temperature");
-                summary = currentCond.getString("summary");
-
-
-            } catch (Exception e) {
-                Log.d("Error", "Cannot process JSON results", e);
-            }
-
-            try {
-                //     httpclient.execute(httppost);
-            } catch (Exception e) {
-                System.out.println("Exception: " + e.getMessage());
-            }
-
-
-//            HttpPost postMethod = new HttpPost(urlString);
-//            HttpClient client = new DefaultHttpClient();
-//            //File file = new File(filePath);
-//           // MultipartEntity entity = new MultipartEntity();
-//            //F//ileBody contentFile = new FileBody(file);
-//           // entity.addPart("userfile",contentFile);
-//            try {
-//            StringBody contentString = new StringBody("This is contentString");
-//                builder.addPart("contentString",contentString);
-//
-//                HttpEntity entity = builder.build();
-//
-//                client.execute(postMethod);
-//            }catch(Exception e){
-//                System.out.println();
-//            }
-
-
-            //  try {
-//                URL url = new URL(urlString);
-//                Map<String, Object> params1 = new LinkedHashMap<>();
-//                params1.put("func", "insertRecord");
-//                params1.put("recName", params[1]);
-//                params1.put("recLat", params[2]);
-//                params1.put("recLon", params[3]);
-//                params1.put("recLure", params[4]);
-//                params1.put("recWeather", params[5]);
-//                params1.put("recSpecies", params[6]);
-//                params1.put("recImage", recordImage);
-//                params1.put("recImage", params[7]);
-
-
-//                params1.put("function", "insertRecord");
-//                params1.put("recName", recName);
-//                params1.put("recLat", recLat);
-//                params1.put("recLon", recLon);
-//                params1.put("recLure", recLure);
-//                params1.put("recWeather", recWeather);
-//                params1.put("recSpecies", recSpecies);
-            // params.put("message", "Shark attacks in Botany Bay have gotten out of control. We need more defensive dolphins to protect the schools here, but Mayor Porpoise is too busy stuffing his snout with lobsters. He's so shellfish.");
-//
-//                StringBuilder postData = new StringBuilder();
-//                for (Map.Entry<String, Object> param : params1.entrySet()) {
-//                    if (postData.length() != 0) postData.append('&');
-//                    postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-//                    postData.append('=');
-//                    postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-//                }
-//                byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-//
-//                conn = (HttpURLConnection) url.openConnection();
-//                conn.setRequestMethod("POST");
-//                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-//                conn.setDoOutput(true);
-//                conn.getOutputStream().write(postDataBytes);
-//                //Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-//                int status = conn.getResponseCode();
-////                for (int c; (c = in.read()) >= 0; )
-////                    System.out.print((char) c);
-//                System.out.println("Response code is " + status);
-//            } catch (Exception e) {
-//                System.out.println("exception in createRecord: " + e.getMessage());
-//            }
-            return "some message";
-        }
-
-
-        public void executeMultipartPost() throws Exception {
-            try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                recordImage.compress(Bitmap.CompressFormat.JPEG, 75, bos);
-                byte[] data = bos.toByteArray();
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost postRequest = new HttpPost(
-                        "http://10.0.2.2/cfc/iphoneWebservice.cfc?returnformat=json&amp;method=testUpload");
-                ByteArrayBody bab = new ByteArrayBody(data, "forest.jpg");
-                // File file= new File("/mnt/sdcard/forest.png");
-                // FileBody bin = new FileBody(file);
-                MultipartEntity reqEntity = new MultipartEntity(
-                        HttpMultipartMode.BROWSER_COMPATIBLE);
-                reqEntity.addPart("uploaded", bab);
-                reqEntity.addPart("photoCaption", new StringBody("sfsdfsdf"));
-                postRequest.setEntity(reqEntity);
-                HttpResponse response = httpClient.execute(postRequest);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        response.getEntity().getContent(), "UTF-8"));
-                String sResponse;
-                StringBuilder s = new StringBuilder();
-
-                while ((sResponse = reader.readLine()) != null) {
-                    s = s.append(sResponse);
+                } catch (Exception e) {
+                    Log.d("Error", "Cannot process JSON results", e);
                 }
-                System.out.println("Response: " + s);
-            } catch (Exception e) {
-                // handle exception here
-                System.out.println("exception in createRecord: " + e.getMessage());
+
+                try {
+                    //  httpclient.execute(httppost);
+                } catch (Exception e) {
+                    System.out.println("Exception: " + e.getMessage());
+                }
+
+
+                try {
+                    URL url = new URL(urlString);
+                    Map<String, Object> params1 = new LinkedHashMap<>();
+                    params1.put("func", "insertRecord");
+                    params1.put("recName", params[1]);
+                    params1.put("recLat", params[2]);
+                    params1.put("recLon", params[3]);
+                    params1.put("recLure", params[4]);
+                    params1.put("recWeather", params[5]);
+                    params1.put("recSpecies", params[6]);
+                    params1.put("curUser", params[7]);
+                    params1.put("recTemp", currTemp);
+                    params1.put("recPath", filePath);
+
+                    StringBuilder postData = new StringBuilder();
+                    for (Map.Entry<String, Object> param : params1.entrySet()) {
+                        if (postData.length() != 0) postData.append('&');
+                        postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                        postData.append('=');
+                        postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                    }
+                    byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                    conn.setDoOutput(true);
+                    conn.getOutputStream().write(postDataBytes);
+                    int responseCode=conn.getResponseCode();
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {//
+                        String line;
+                        BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        while ((line=br.readLine()) != null) {
+                            response+=line;
+                        }
+                    }
+                    else {
+                        response="";
+                    }
+                } catch (Exception e) {
+                    System.out.println("exception in createRecord: " + e.getMessage());
+                }
+                System.out.println(response);
+
+                parentActivity.setcreateRecordResponse(response);
+                return response;
+            }
+            else {
+               return "unknown  function";
             }
         }
-
-
-
 
         @Override
         protected void onPostExecute(String message) {
             //process message
+        }
+    }
+
+    class MessageDisplay implements Runnable {
+        String str;
+        MessageDisplay(String s) { str = s; }
+        public void run() {
+            AlertDialog alertDialog = new AlertDialog.Builder(CreateRecordActivity.this).create();
+            alertDialog.setMessage(str);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mutex.release();
+                            dialog.dismiss();
+
+                        }
+                    });
+            alertDialog.show();
+        }
+    }
+
+    private void setcreateRecordResponse(String response) {
+        //Looper.prepare();
+// go back to main activity, display message, after addition of saving... dialog, remove dialog
+        String success = "\"success\"";
+        if(response.contains(success)){
+
+            //create a file to write bitmap data
+            //File file = new File(recName);
+            try {
+                //create a file to write bitmap data
+                File file = new File(filePath);
+                file.createNewFile();
+
+                //Convert bitmap to byte array
+                //Bitmap bitmap = your bitmap;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                recordImage.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+//write the bytes in file
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(bitmapdata);
+                fos.flush();
+                fos.close();
+
+
+            }catch(java.io.IOException ioe){
+                System.out.println(ioe.getMessage());
+            }
+
+            SharedPreferences settings = getSharedPreferences(RECORD_SETTINGS, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("CurrentLure", curLure);
+            editor.commit();
+            runOnUiThread(new MessageDisplay("Fish Saved!"));
+
+
+           try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+            finish();
+        }else {
+            runOnUiThread(new MessageDisplay("Server Error"));
         }
     }
 
@@ -457,27 +388,11 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_record);
-//        if (mGoogleApiClient == null) {
-//            mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                    .addConnectionCallbacks(this)
-//                    .addOnConnectionFailedListener(this)
-//                    .addApi(LocationServices.API)
-//                    .build();
-//        }
-//        if (mGoogleApiClient != null) {
-//            mGoogleApiClient.connect();
-//        }
-//        System.out.println(mGoogleApiClient.toString());
-//        this.getLocation();
-        //Intent intent = getIntent();
-        // Bundle extras = getIntent().getExtras().getBundle("pictureData");
-        // Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-        //Bitmap imageBitmap = (Bitmap) getIntent().getExtras().get("pictureData");
         File tempImage = (File) getIntent().getExtras().get("pictureData");
-        recLat = (String) getIntent().getExtras().get("recLat");// consider moving lat and long retreval
-        recLon = (String) getIntent().getExtras().get("recLon");// code to this location
-
+        recLat = (String) getIntent().getExtras().get("recLat");
+        recLon = (String) getIntent().getExtras().get("recLon");
+        curUser = (String) getIntent().getExtras().get("curUser");
         Bitmap bitmap = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -492,58 +407,84 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 R.array.fish_species_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         speciesSpinner.setAdapter(adapter);
+
+        Spinner weatherSpinner = (Spinner) findViewById(R.id.weatherSpinner);
+        ArrayAdapter<CharSequence> weatherAdapter = ArrayAdapter.createFromResource(this,
+                R.array.weather_display_array, android.R.layout.simple_spinner_item);
+        weatherAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        weatherSpinner.setAdapter(weatherAdapter);
+        networkConnection c = new networkConnection(this);
+        String[] parameters = new String[3];
+        parameters[0] = "getWeather";
+        parameters[1] = recLat;
+        parameters[2] = recLon;
+        try {
+            c.execute(parameters).get();
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+
+
         ImageView img = (ImageView) findViewById(R.id.picture_preview_view);
         img.setImageBitmap(bitmap);
         recordImage = bitmap;
         EditText nameField = (EditText) findViewById(R.id.nameField);
         nameField.setText(tempImage.getName());
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        SharedPreferences recordPrefs = getSharedPreferences(RECORD_SETTINGS, 0);
+        curLure = recordPrefs.getString("CurrentLure", "");
+       if(!curLure.equals("")){
+           EditText lureField = (EditText) findViewById(R.id.lureField);
+           lureField.setText(curLure);
+        }
 
-        //  EditText nameField = (EditText)findViewById(R.id.name);
-//        mapView = (MapView) findViewById(R.id.mapView);
-//        mapView.onCreate(savedInstanceState);
-//        mapView.getMapAsync(new OnMapReadyCallback() {
-//            @Override
-//            public void onMapReady(MapboxMap mapboxMap) {
-//
-//                // Customize map with markers, polylines, etc.
-//
-//            }
-//        });
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        //client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    // Add the mapView lifecycle to the activity's lifecycle methods
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        mapView.onResume();
-//    }
-//
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        mapView.onPause();
-//    }
-//
-//    @Override
-//    public void onLowMemory() {
-//        super.onLowMemory();
-//        mapView.onLowMemory();
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        mapView.onDestroy();
-//    }
-//
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        mapView.onSaveInstanceState(outState);
-//    }
+    private void setWeatherSpinnerSelection(JSONObject weatherObj) {
+        Spinner weatherSpinner = (Spinner) findViewById(R.id.weatherSpinner);
+        try {
+            JSONObject currentCond = weatherObj.getJSONObject("currently");
+            String curCond = currentCond.getString("icon");
+            System.out.println("current Weather is : " + curCond);
+            String setValue = "";
+            if (curCond.equals("clear-day")) {
+                setValue = "Clear";
+            } else if (curCond.equals("clear-night")) {
+                setValue = "Clear";
+            } else if (curCond.equals("rain")) {
+                setValue = "Rain";
+            } else if (curCond.equals("snow")) {
+                setValue = "Snow";
+            } else if (curCond.equals("sleet")) {
+                setValue = "Sleet";
+            } else if (curCond.equals("wind")) {
+                setValue = "Windy";
+            } else if (curCond.equals("fog")) {
+                setValue = "Fog";
+            } else if (curCond.equals("cloudy")) {
+                setValue = "Cloudy";
+            } else if (curCond.equals("partly-cloudy-day")) {
+                setValue = "Partly Cloudy";
+            } else if (curCond.equals("partly-cloudy-night")) {
+                setValue = "Partly Cloudy";
+            }
+
+            for (int i = 0; i < weatherSpinner.getCount(); i++) {
+                String s = weatherSpinner.getItemAtPosition(i).toString();
+                if (weatherSpinner.getItemAtPosition(i).equals(setValue)) {
+                    weatherSpinner.setSelection(i);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("some error!!!!");
+            if(null != e.getMessage()){
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (data != null) {
@@ -551,98 +492,71 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
             }
         }
-
     }
-
-
-
     public void createRecord(View view) {
 
-        //Connection myConn = Connect.getConnection();
-//
-//            Class.forName(driver).newInstance();//loading driver
-//            con = DriverManager.getConnection(url,username,password);
         System.out.println("in createRecord");
-        boolean flag = false;
-        PreparedStatement myStmt = null;
-        ResultSet myRs = null;
-        Connection con = null;
-        HttpURLConnection conn = null;
         Spinner speciesSpinner = (Spinner) findViewById(R.id.speciesSpinner);
         EditText nameField = (EditText) findViewById(R.id.nameField);
         String recName = nameField.getText().toString();
-        String timeStamp = new SimpleDateFormat("yyMMddHHmmss").format(new Date());
         EditText lureField = (EditText) findViewById(R.id.lureField);
-        EditText weatherField = (EditText) findViewById(R.id.weatherField);
+        Spinner weatherSpinner = (Spinner) findViewById(R.id.weatherSpinner);
         String recLure = lureField.getText().toString();
-        String recWeather = weatherField.getText().toString();
+        String recWeather = weatherSpinner.getSelectedItem().toString();
         String recSpecies = speciesSpinner.getSelectedItem().toString();
 
 
-       ImageView img = (ImageView) findViewById(R.id.picture_preview_view);
-       Bitmap recordPic = ((BitmapDrawable)img.getDrawable()).getBitmap();
+        ImageView img = (ImageView) findViewById(R.id.picture_preview_view);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-       // recordPic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
 
         String encodedBytes = Base64.encodeToString(byteArray, Base64.DEFAULT);
+        curLure = recLure;
 
-        //try {
-            //URL url = new URL(urlString);
-            String[] parameters = new String[8];
+        String[] parameters = new String[9];
         //String[] parameters = new String[7];
-            Map<String, Object> params = new LinkedHashMap<>();
-            parameters[0]= "insertRecord";
-            parameters[1]=  recName;
-            parameters[2]=  recLat;
-            parameters[3]= recLon;
-            parameters[4]= recLure;
-            parameters[5]= recWeather;
-            parameters[6]= recSpecies;
-            parameters[7]= encodedBytes;
-            networkConnection c = new networkConnection();
-            c.execute(parameters);
+        Map<String, Object> params = new LinkedHashMap<>();
+        parameters[0] = "insertRecord";
+        parameters[1] = recName;
+        parameters[2] = recLat;
+        parameters[3] = recLon;
+        parameters[4] = recLure;
+        parameters[5] = recWeather;
+        parameters[6] = recSpecies;
+        parameters[7] = curUser;
+        parameters[8] = encodedBytes;
+
+        recordName = recName;
+        networkConnection c = new networkConnection(this);
+        c.execute(parameters);
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-       // mGoogleApiClient.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "CreateRecord Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
+        client.connect();
+        Action viewAction2 = Action.newAction(
+                Action.TYPE_VIEW,
+                "CreateRecord Page",
                 Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
                 Uri.parse("android-app://wildlogic.fishlog/http/host/path")
         );
-       // AppIndex.AppIndexApi.start(mGoogleApiClient, viewAction);
+        AppIndex.AppIndexApi.start(client, viewAction2);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "CreateRecord Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
+        Action viewAction2 = Action.newAction(
+                Action.TYPE_VIEW,
+                "CreateRecord Page",
                 Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
                 Uri.parse("android-app://wildlogic.fishlog/http/host/path")
         );
-        AppIndex.AppIndexApi.end(mGoogleApiClient, viewAction);
-       // mGoogleApiClient.disconnect();
+        AppIndex.AppIndexApi.end(client, viewAction2);
+
+        client.disconnect();
     }
 }
