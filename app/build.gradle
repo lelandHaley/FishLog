@@ -29,10 +29,8 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
-//    configurations {
-//        all*.exclude group: 'org.apache.httpcomponents', module: 'messageconstraintexception'
-//        all*.exclude group: 'org.apache.httpcomponents:httpmime:4.3.6', module: 'httpclient'
-//    }
+
+
 
 
 
@@ -42,48 +40,17 @@ android {
         compile project(':mysql-connector-java-commercial-5.1.7-bin')
 
         compile 'com.android.support:appcompat-v7:24.2.0'
-        //compile 'com.google.android.gms:play-services-appindexing:8.1.0'
         compile 'com.google.android.gms:play-services-appindexing:9.8.0'
         compile 'com.google.android.gms:play-services:9.8.0'
-
-        //compile 'org.apache.httpcomponents:httpcore:4.4.6'
-        // compile 'org.apache.httpcomponents:httpclient:4.5'
-        //compile 'org.apache.httpcomponents:httpmime:4.5.3'
-
-        //compile 'com.google.android.gms:play-services-location9.8.0'
-        //compile 'com.google.android.gms:play-services-location:10.+'
-
 
         compile 'com.google.android.gms:play-services-ads:9.8.0'
         compile 'com.google.android.gms:play-services-auth:9.8.0'
         compile 'com.google.android.gms:play-services-gcm:9.8.0'
-
-       // compile 'com.android.support:appcompat-v7:19.+'87 B
-
-        //compile fileTree(dir: 'libs', include: ['*.jar'])
         compile 'com.survivingwithandroid:weatherlib:1.4.0'
         compile 'com.survivingwithandroid:weatherlib_volleyclient:1.4.0'
 
-//        compile('org.apache.httpcomponents:httpmime:4.3.6') {
-//            exclude module: 'httpclient'
-//            exclude module: 'multipartentity'
-//        }
-        //compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
-//    compile('org.apache.httpcomponents:httpmime:4.3.6') {
-//        exclude module: 'httpclient'
-//    }
-
-
-        // compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
         compile 'com.android.support:multidex:1.0.1'
-        //compile 'com.android.support:multidex:1.0.0'
         compile 'com.google.code.gson:gson:2.8.1'
-
-//        compile('org.apache.httpcomponents:httpmime:4.3.6') {//these lines
-//            exclude module: 'httpclient'
-//        }
-//        compile 'org.apache.httpcomponents:httpclient-android:4.3.5' // cause duplicateEntryException
-
 
     }
 }

@@ -1,4 +1,6 @@
 <resources>
+    <string name="api_key">AIzaSyCgpet8FCHft3YI0vvg5Mv51yC8hMZtqYI</string>
+
     <string name="title">Fish Log</string>
     <string name="welcome_banner">Welcome To Your Fish Log</string>
     <string name="create_record_button_text">Save Fish</string>
@@ -27,19 +29,19 @@
     <string name="registerConfirmPassword">Enter Email Address</string>
     <string name="error">Error</string>
     <string name="username_length_error">Username Must Be At Least 1 Character Long</string>
-    <string name="password_length_error">Password Must Be At Least 8 Character Long</string>
-    <string name="password_format_error">Password Must Contain At Least 8 Characters, At Least 1  Letter, And At Least 1 Number, And At Least 1 Special Character</string>
+    <string name="password_length_error">Password Must Be At Least 8 Characters Long</string>
+    <string name="password_format_error">Password Must Contain At Least 8 Characters, At Least 1 Letter, And At Least 1 Number, And At Least 1 Special Character</string>
     <string name="password_match_error">Passwords Do Not Match</string>
     <string name="email_format_error">Invalid Email Format</string>
     <string name="logout">Log Out</string>
     <string name="filter_by">Filter By: </string>
-    <string name="filter_title">Search Your Recorded Fish Records</string>
-    <string name="manage_request">Manage Freinds</string>
+    <string name="filter_title">Search  Your Recorded Fish Records</string>
+    <string name="manage_request">Manage friends</string>
     <string name="filter_by_species">Filter By Species</string>
     <string name="filter_by_conditions">Filter By Weather Conditions</string>
     <string name="search">Search</string>
     <string name="filter_near_me">Miles From Current Location</string>
-    <string name="filter_time_of_day">Enter Start And End Time (Enter Hours Only)</string>
+    <string name="filter_time_of_day">Enter Start And End Time (24 Hour Format)</string>
     <string name="near_me_text_placeholder">Enter Miles</string>
     <string name="placehholder">placehholder</string>
     <string name="display_name">Record Name</string>
@@ -59,30 +61,29 @@
     <string name="manage_friends">Manage Friends</string>
     <string name="poweredByText">Powered by Google Play Services and Darksky.net</string>
     <string name="no_records">No Records To Display Using Current Filter</string>
-    <string name="send_request">Send Freind Request</string>
+    <string name="send_request">Send friend Request</string>
     <string name="view_friends">View Friends</string>
     <string name="remove_friend">Remove Friend</string>
-    <string name="enter_user">Send Freind Request To User:</string>
+    <string name="enter_user">Send friend Request To User:</string>
     <string name="my_friends">My Friends</string>
     <string name="pending_request">Users With Pending Requests</string>
     <string name="delete_friend">Delete This Friend</string>
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
+    <string name="view_requests">View Incoming Requests</string>
+    <string name="working">Working...</string>
+    <string name="placeholder">placeholder</string>
+    <string name="view_map">View Map</string>
+    <string name="recenter">Recenter</string>
+    <string name="refresh">Refresh Map</string>
+    <string name="change_filter">Change Filter</string>
+    <string name="filter_map_title">\t\t\t\t\tEdit Record Display Filter</string>
+    <string name="speciesFilterText">Select Species</string>
+    <string name="viewAllFilterText">View Records From All Friends</string>
+    <string name="weatherFilterText">Select Weather Condition</string>
+    <string name="time_filter_text">Select Time To Filter By\n \t(Enter Hours 0 - 24)</string>
+    <string name="cancel_filter_button_text">Cancel</string>
+    <string name="save_filter_button_text">Save</string>
+    <string name="select_pending_request">Select Pending Request From Other Users To Accept</string>
+    <string name="accept_pending_request">Accept Request</string>
     <!--<string name=""></string>-->
     <!--<string name=""></string>-->
     <!--<string name=""></string>-->
@@ -120,6 +121,8 @@
         <item>Panfish</item>
     </string-array>
 
+    fish_species_array_all_included
+
     <string-array name="filter_records_by_attribute_array">
         <item>No Filter</item>
         <item>Species</item>
@@ -138,6 +141,7 @@
         <item>Cloudy</item>
         <item>Partly Cloudy</item>
     </string-array>
+    <string name="title_activity_map">Map</string>
 
 </resources>
 

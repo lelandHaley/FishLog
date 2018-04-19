@@ -115,6 +115,7 @@ public class GetWeatherActivity extends AppCompatActivity {
     private void setWeatherData(JSONObject wData) {
         this.weatherJson = wData;
         TextView currCondField = (TextView) findViewById(R.id.cur_cond_field);
+
         TextView currTempField = (TextView) findViewById(R.id.current_temperature_field);
         TextView cloudCoverField = (TextView) findViewById(R.id.cloud_cover_field);
         TextView windSpeedField = (TextView) findViewById(R.id.wind_speed_field);
@@ -127,7 +128,7 @@ public class GetWeatherActivity extends AppCompatActivity {
             currCondField.setText(currWeatherObj.getString("icon"));
             currTempField.setText(currWeatherObj.getString("temperature") + " °F");
             cloudCoverField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("cloudCover")) * 100) + " %");
-            windSpeedField.setText(currWeatherObj.getString("windSpeed") + "Miles per Hour");
+            windSpeedField.setText(currWeatherObj.getString("windSpeed") + " Miles per Hour");
             precipChanceField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("precipProbability")) * 100) + " %");
 
 

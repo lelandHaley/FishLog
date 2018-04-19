@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerHorizontal="true"
+    android:layout_gravity="center"
+    >
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+        </LinearLayout>
+
+    <TextView
+        android:id="@+id/speciesSelectText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip"
+        android:text="@string/speciesFilterText"
+        android:textSize="28sp"/>
+
+    <Spinner
+        android:id="@+id/speciesSelectionSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/speciesSelectText"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip"
+        android:textSize="28sp"/>
+
+    <TextView
+        android:id="@+id/weatherSelectText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/speciesSelectionSpinner"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip"
+        android:text="@string/weatherFilterText"
+        android:textSize="28sp"/>
+
+    <Spinner
+        android:id="@+id/weatherSelectionSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weatherSelectText"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip"
+        android:textSize="28sp"/>
+
+    <TextView
+        android:id="@+id/timeCaughtFilterText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weatherSelectionSpinner"
+        android:layout_gravity="center_vertical"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="10dip"
+        android:textSize="28sp"
+        android:text="@string/time_filter_text"/>
+
+    <LinearLayout
+        android:id="@+id/multiInputLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timeCaughtFilterText"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/leftInputField"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dip"
+            android:background="@layout/border"
+            android:hint="Start Time"
+            android:digits="0123456789"
+            android:inputType="number"/>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="10dp" />
+
+        <EditText
+            android:id="@+id/rightInputField"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dip"
+            android:layout_toLeftOf="@+id/leftInputField"
+            android:background="@layout/border"
+            android:hint="End Time"
+            android:digits="0123456789"
+            android:inputType="number"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/allUsersFilterText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/multiInputLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip"
+        android:text="@string/viewAllFilterText"
+        android:textSize="28sp"/>
+
+    <Switch
+        android:id="@+id/viewAllFreindsSwitch"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_below="@id/allUsersFilterText"
+        />
+
+    <Space
+        android:id="@+id/saveCancelButtonSpace"
+        android:layout_width="10dp"
+        android:layout_height="30dp"
+        android:layout_below="@+id/viewAllFreindsSwitch"/>
+
+    <LinearLayout
+        android:id="@+id/saveCancelLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/saveCancelButtonSpace"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel_filter_button_text"
+            android:id="@+id/cancelFilterButton"
+            android:onClick="cancelFilter"
+            android:textSize="20sp"
+            android:layout_centerHorizontal="true"
+            />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="10dp" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/save_filter_button_text"
+            android:id="@+id/saveFilterButton"
+            android:onClick="saveFilter"
+            android:textSize="20sp"
+            android:layout_centerHorizontal="true"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+    </LinearLayout>
+
+</RelativeLayout>
+

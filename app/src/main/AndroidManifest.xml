@@ -4,6 +4,7 @@
     package="wildlogic.fishlog">
 
     <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18" /> -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -11,6 +12,23 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+    <receiver android:name=".custom.ConnectivityChangeReceiver">
+        <intent-filter>
+            <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+        </intent-filter>
+    </receiver>
+
+    <receiver android:name="com.myBroadcastReceiver" >
+        <intent-filter>
+            <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
+            <action android:name="android.net.wifi.STATE_CHANGE" />
+        </intent-filter>
+    </receiver>
+
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -26,7 +44,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:label,android:icon">
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="your API key"/>
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="@string/api_key"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,11 +67,46 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.API_KEY"-->
+            <!--android:value="@string/google_maps_key" />-->
+
         <!-- <activity android:name=".DisplayMessageActivity"></activity> -->
         <activity android:name=".CreateRecordActivity"></activity>
         <activity android:name=".GetRecordsActivity"></activity>
         <activity android:name=".GetWeatherActivity"></activity>
         <activity android:name=".ManageFriendsActivity"></activity>
+        <activity android:name="wildlogic.fishlog.MapActivity"
+            android:label="@string/title_activity_map"></activity>
     </application>
 
 </manifest>
+<!--&lt;!&ndash;=======&ndash;&gt;-->
+<!--<manifest xmlns:android="http://schemas.android.com/apk/res/android" >-->
+      <!--&lt;!&ndash;-->
+         <!--The ACCESS_COARSE/FINE_LOCATION permissions are not required to use-->
+         <!--Google Maps Android API v2, but you must specify either coarse or fine-->
+         <!--location permissions for the 'MyLocation' functionality.-->
+     <!--&ndash;&gt;-->
+    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>-->
+
+    <!--<application>-->
+
+        <!--&lt;!&ndash;-->
+             <!--The API key for Google Maps-based APIs is defined as a string resource.-->
+             <!--(See the file "res/values/google_maps_api.xml").-->
+             <!--Note that the API key is linked to the encryption key used to sign the APK.-->
+             <!--You need a different API key for each encryption key, including the release key that is used to-->
+             <!--sign the APK for publishing.-->
+             <!--You can define the keys for the debug and release targets in src/debug/ and src/release/.-->
+         <!--&ndash;&gt;-->
+        <!--<meta-data android:name="com.google.android.geo.API_KEY" android:value="@string/google_maps_key"/>-->
+
+        <!--<activity android:name="wildlogic.fishlog.MapActivity"-->
+            <!--android:label="@string/title_activity_map">-->
+
+        <!--</activity>-->
+    <!--</application>-->
+
+<!--</manifest>-->
+<!--&gt;>>>>>> Added-->

@@ -15,6 +15,7 @@ public class Record {
     private String user;
     private String path;
     private String hour;
+    private String uploaded;
 
     public Record(){
         name = "";
@@ -27,7 +28,7 @@ public class Record {
         temperature = "";
         user = "";
         path = "";
-
+        hour = "";
     }
 
     public Record(String name, String latitude, String longitude, String lure, String weather, String species, String time, String temperature, String user, String path){
@@ -41,6 +42,35 @@ public class Record {
         this.temperature = temperature;
         this.user = user;
         this.path = path;
+    }
+
+    public Record(String name, String latitude, String longitude, String lure, String weather, String species, String time, String temperature, String user, String path, String hour){
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.lure = lure;
+        this.weather = weather;
+        this.species = species;
+        this.time = time;
+        this.temperature = temperature;
+        this.user = user;
+        this.path = path;
+        this.hour = hour;
+    }
+
+    public Record(String name, String latitude, String longitude, String lure, String weather, String species, String time, String temperature, String user, String path, String hour, String uploaded){
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.lure = lure;
+        this.weather = weather;
+        this.species = species;
+        this.time = time;
+        this.temperature = temperature;
+        this.user = user;
+        this.path = path;
+        this.hour = hour;
+        this.uploaded = uploaded;
     }
     public String getHour() {
         return hour;
@@ -128,5 +158,18 @@ public class Record {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(String uploaded) {
+        this.uploaded = uploaded;
+    }
+
+    @Override
+    public String toString(){
+        return this.getName() + "\n" + this.getSpecies()+ "\n" + this.getLure()+ "\n" + this.getWeather()+ "\n" + this.getTime()+ "\n" + this.getUser() + "\n" + this.getUploaded();
     }
 }

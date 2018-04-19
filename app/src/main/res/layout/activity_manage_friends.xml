@@ -41,6 +41,7 @@
         android:text="@string/send_request"
         android:textSize="28sp"/>
 
+
     <Button
         android:id="@+id/viewFreindsButton"
         android:layout_width="wrap_content"
@@ -67,6 +68,20 @@
         android:width="340px"
         android:onClick="beginRemoveFriend"
         android:text="@string/remove_friend"
+        android:textSize="28sp"/>
+
+    <Button
+        android:id="@+id/ViewIncomingRequestButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/RemoveFriendRequestButton"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_margin="13dp"
+        android:height="100px"
+        android:width="340px"
+        android:onClick="beginViewIncomingRequest"
+        android:text="@string/view_requests"
         android:textSize="28sp"/>
 
     <RelativeLayout
@@ -233,6 +248,71 @@
             android:onClick="completeDeleteFriendClicked"
             android:text="@string/delete_friend"
             android:textSize="28sp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/acceptPendingRequestLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/manageFriendsTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/acceptPendingRequestText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:text="@string/select_pending_request"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_marginTop="20dip"
+            android:layout_marginBottom="10dip"
+            android:textSize="36sp" />
+
+        <Spinner
+            android:id="@+id/acceptPendingRequestSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/acceptPendingRequestText"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:background="@layout/border"
+            android:textSize="28sp"
+            android:layout_marginBottom="10dip" />
+
+        <Button
+            android:id="@+id/acceptPendingRequestButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/acceptPendingRequestSpinner"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:height="70px"
+            android:width="340px"
+            android:onClick="completeAcceptPendingRequest"
+            android:text="@string/accept_pending_request"
+            android:textSize="28sp"/>
+
+        <Button
+            android:id="@+id/declinePendingRequestButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/acceptPendingRequestButton"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:height="70px"
+            android:width="340px"
+            android:onClick="declinePendingRequest"
+            android:text="@string/accept_pending_request"
+            android:textSize="28sp"/>
+
 
     </RelativeLayout>
 

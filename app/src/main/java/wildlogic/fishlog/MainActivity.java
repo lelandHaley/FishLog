@@ -1,9 +1,14 @@
 package wildlogic.fishlog;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -12,7 +17,10 @@ import android.graphics.BitmapFactory;
 import android.icu.text.BreakIterator;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
@@ -22,12 +30,15 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -87,12 +98,16 @@ public class MainActivity extends AppCompatActivity
     static final int REQUEST_CREATE_RECORD = 1;
     static final int REQUEST_GET_WEATHER = 1;
     static final int REQUEST_MANAGE_FRIENDS = 1;
+    static final int REQUEST_VIEW_MAP = 1;
     static final int REQUEST_LOGIN_PROMPT = 1;
-    private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
-    // private String urlString = "http://192.168.1.2:8080/FishLogServlet/DBConectionServlet";// home
+    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
+    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
     //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";
-   // private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    //private String urlString = "http://192.168.3.55:8080/FishLogServlet/DBConectionServlet";//sip n' surf
 
+
+    private final String BROADCAST = this.getPackageName() + ".android.action.broadcast";
     public String mCurrentPhotoPath;
 
     //private FusedLocationProviderClient mFusedLocationClient;
@@ -109,6 +124,15 @@ public class MainActivity extends AppCompatActivity
     private Dialog loginDialog;
     private Dialog registerDialog;
     String curUser, curLure = "";
+    private Record[] recordsToSend;
+    TelephonyManager myTelephonyManager;
+    PhoneStateListener callStateListener;
+    myBroadcastReceiver myReceiver;
+    DBHandler dbHandler;
+    //MyBroadcastReceiver myReceiver;
+    //private boolean hasWiFi = true;
+    // private boolean hasCellReception = true;
+    private boolean hasReception = false;
 
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final String PREFS = "prefFile";
@@ -121,34 +145,12 @@ public class MainActivity extends AppCompatActivity
         // The layout file is defined in the project res/layout/main_activity.xml file
         setContentView(R.layout.activity_main);
 
-
-        //checking permissions for lcoation
-//        ArrayList<String> permissions=new ArrayList<>();
-//        PermissionUtils permissionUtils;
-//
-//        permissionUtils=new PermissionUtils(MyLocationUsingLocationAPI.this);
-//
-//        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-//        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-//
-//        permissionUtils.check_permission(permissions,"Need GPS permission for getting your location",1);
-
-        //GoogleApiClient mGoogleApiClient;
-       // GoogleApiClient
-
-//
-//
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
-
-//            mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                    .addApi(Drive.API)
-//                    .addScope(Drive.SCOPE_FILE)
-//                    .build();
         }
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
@@ -169,48 +171,110 @@ public class MainActivity extends AppCompatActivity
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if(location != null){
+        if (location != null) {
             //location.
             locLat = String.valueOf(location.getLatitude());
             locLong = String.valueOf(location.getLongitude());
             System.out.println("Device latitude is : " + locLat);
             System.out.println("Device longitude is : " + locLong);
         }
-
-
-
-
         if (mLastLocation != null) {
-//            BreakIterator mLatitudeText = null;
-//            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-//            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-
-
             locLat = String.valueOf(mLastLocation.getLatitude());
             locLong = String.valueOf(mLastLocation.getLongitude());
             System.out.println("Device latitude is : " + locLat);
             System.out.println("Device longitude is : " + locLong);
-
         }
-
 
 
         SharedPreferences settings = getSharedPreferences(PREFS, 0);
         curUser = settings.getString("CurrentUser", "");
-        if(curUser.equals("")){
+        if (curUser.equals("")) {
             callLoginDialog();
         }
 
 
         System.out.println(mGoogleApiClient.toString());
+
+
+        dbHandler = new DBHandler(this);
+        myReceiver = new myBroadcastReceiver();
+
+        IntentFilter intentFilter = new IntentFilter(BROADCAST);
+        registerReceiver(myReceiver, intentFilter);
+
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+    }
+
+    public void uploadRecords() {
+        recordsToSend = dbHandler.getRecords();
+        for (Record r : recordsToSend) {
+            String[] parameters = new String[12];
+            //String[] parameters = new String[7];
+
+            parameters[0] = "uploadRecord";
+            parameters[1] = r.getName();
+            parameters[2] = r.getLatitude();
+            parameters[3] = r.getLongitude();
+            parameters[4] = r.getLure();
+            parameters[5] = r.getWeather();
+            parameters[6] = r.getSpecies();
+            parameters[7] = r.getTime();
+            parameters[8] = r.getTemperature();
+            parameters[9] = r.getPath();
+            parameters[10] = r.getUser();
+            parameters[11] = r.getHour();
+
+            networkConnection c = new networkConnection(this);
+            // HttpResponse responseGet =
+            String response = String.valueOf(c.execute(parameters));
+//            String response = String.valueOf(c.execute(parameters));
+        }
+    }
+
+    public void viewMap(View view) {
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+
+        if (hasReception) {
+            System.out.println("viewing map");
+            uploadRecords();
+            Intent i = new Intent(getApplicationContext(), MapActivity.class);
+            i.putExtra("curUser", curUser);
+            i.putExtra("curLat", locLat);
+            i.putExtra("curLon", locLong);
+
+            startActivityForResult(i, REQUEST_VIEW_MAP);
+        } else {
+            displayPopupMessage("No Data Connection, Cannot View Map");
+        }
     }
 
 
-    public void manageFreinds(View view){
+    public void manageFreinds(View view) {
         System.out.println("Going to manage friends page");
-        Intent i = new Intent(getApplicationContext(), ManageFriendsActivity.class);
-        i.putExtra("curUser", curUser);
-        startActivityForResult(i, REQUEST_MANAGE_FRIENDS);
+
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+
+        if (hasReception) {
+            uploadRecords();
+            Intent i = new Intent(getApplicationContext(), ManageFriendsActivity.class);
+            i.putExtra("curUser", curUser);
+            startActivityForResult(i, REQUEST_MANAGE_FRIENDS);
+        } else {
+            displayPopupMessage("No Data Connection, Cannot Manage Friends");
+        }
+
     }
 
 
@@ -218,23 +282,49 @@ public class MainActivity extends AppCompatActivity
         System.out.println("Taking picture");
         dispatchTakePictureIntent();
     }
-    public void getWeather(View view) {
-        System.out.println("Getting Weather");
-        Intent i = new Intent(getApplicationContext(), GetWeatherActivity.class);
-        //i.putExtra("pictureData", bitmap);
 
-        i.putExtra("recLat", locLat);
-        i.putExtra("recLon", locLong);
-        startActivityForResult(i, REQUEST_GET_WEATHER);
+    public void getWeather(View view) {
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+
+        if (hasReception) {
+            uploadRecords();
+            System.out.println("Getting Weather");
+            Intent i = new Intent(getApplicationContext(), GetWeatherActivity.class);
+            //i.putExtra("pictureData", bitmap);
+
+            i.putExtra("recLat", locLat);
+            i.putExtra("recLon", locLong);
+            startActivityForResult(i, REQUEST_GET_WEATHER);
+        } else {
+            displayPopupMessage("No Data Connection, Cannot View Weather");
+        }
     }
 
     public void getRecords(View view) {
-        System.out.println("Getting Records");
-        Intent i = new Intent(getApplicationContext(), GetRecordsActivity.class);
-        i.putExtra("user", curUser);
-        i.putExtra("recLat", locLat);
-        i.putExtra("recLon", locLong);
-        startActivityForResult(i, REQUEST_GET_RECORDS);
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
+
+        if (hasReception) {
+            //Record r = new Record("testName", "2.2", "3.3", "TESTLure", "testWeather", "TestSpecies", "10:10:10:10:10", "0.0", curUser, "//frfrf", "10");
+            // long l = dbHandler.addUnsavedRecord(r);
+            uploadRecords();
+
+            System.out.println("Getting Records");
+            Intent i = new Intent(getApplicationContext(), GetRecordsActivity.class);
+            i.putExtra("user", curUser);
+            i.putExtra("recLat", locLat);
+            i.putExtra("recLon", locLong);
+            startActivityForResult(i, REQUEST_GET_RECORDS);
+        } else {
+            displayPopupMessage("No Data Connection, Cannot View Saved Records");
+        }
     }
 
 
@@ -263,32 +353,17 @@ public class MainActivity extends AppCompatActivity
         return image;
     }
 
-    private void callLoginDialog()
-    {
+    private void callLoginDialog() {
         loginDialog = new Dialog(this);
         loginDialog.setContentView(R.layout.form_login);
         loginDialog.setCancelable(false);
-        TextView titleView = (TextView)loginDialog.findViewById(android.R.id.title);
+        TextView titleView = (TextView) loginDialog.findViewById(android.R.id.title);
         titleView.setGravity(Gravity.CENTER);
-        Button login = (Button) loginDialog.findViewById(R.id.logInButton);
 
-//        EditText emailaddr = (EditText) myDialog.findViewById(R.id.youremailID);
-//        EditText password = (EditText) myDialog.findViewById(R.id.yourpasswordID);
         loginDialog.setTitle(getString(R.string.login_banner));
         loginDialog.show();
-
-//        login.setOnClickListener(new View.OnClickListener()
-//        {
-//
-//            @Override
-//            public void onClick(View v)
-//            {
-//                System.out.println("from onClickListener"); keeping in case i need to use this method to keep track of dialog, maybe view in method
-//            }
-//        });
-
-
     }
+
     private void processResult(String message) {
         AlertDialog infoDialog = new AlertDialog.Builder(MainActivity.this).create();
 
@@ -299,24 +374,19 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-        if(message.equals("0")){
+        if (message.equals("0")) {
             infoDialog.setMessage("Success, You Should Be Recieving A Confirmation Email Shortly");
             registerDialog.dismiss();
-        }
-        else if(message.equals("1")){
+        } else if (message.equals("1")) {
             infoDialog.setMessage("The Provided Username Already Exists In The Database");
             infoDialog.setTitle(getString(R.string.error));
-        }
-        else if(message.equals("2") || message.equals("4")){
+        } else if (message.equals("2") || message.equals("4")) {
             infoDialog.setMessage("The User Could Not Be Added");
-        }
-        else if(message.equals("3")){
+        } else if (message.equals("3")) {
             infoDialog.setMessage("Something Went Wrong While Checking If Username Was Taken");
-        }
-        else if(message.equals("5")){
+        } else if (message.equals("5")) {
             infoDialog.setMessage("Something Went Wrong While Checking If Email Was Taken");
-        }
-        else if(message.equals("6")){
+        } else if (message.equals("6")) {
             infoDialog.setMessage("The Provided Email Already Exists In Our Records");
         }
         infoDialog.show();
@@ -332,7 +402,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-        if(message.equals("0")){
+        if (message.equals("0")) {
             infoDialog.setMessage("Login Successfull");
             curUser = user;
             SharedPreferences settings = getSharedPreferences(PREFS, 0);
@@ -341,23 +411,20 @@ public class MainActivity extends AppCompatActivity
             // Commit the edits
             editor.commit();
             loginDialog.dismiss();
-        }
-        else if(message.equals("1")){
+        } else if (message.equals("1")) {
             infoDialog.setMessage("Username Does Not Match Password");
             infoDialog.setTitle(getString(R.string.error));
-        }
-        else if(message.equals("2")){
+        } else if (message.equals("2")) {
             infoDialog.setTitle(getString(R.string.error));
             infoDialog.setMessage("Something Went Wrong While Connecting To Server");
-        }
-        else if(message.equals("3")){
+        } else if (message.equals("3")) {
             infoDialog.setTitle(getString(R.string.error));
             infoDialog.setMessage("Something Went Wrong While Checking If Username And Password Match");
         }
         infoDialog.show();
     }
 
-    public void registerNewUser(View view){
+    public void registerNewUser(View view) {
 
         System.out.println("from register new user");
         EditText usernameEditText = (EditText) registerDialog.findViewById(R.id.registerUsername);
@@ -371,7 +438,7 @@ public class MainActivity extends AppCompatActivity
         String emailInput = String.valueOf(emailEditText.getText());
         boolean errorState = false;
         String errorMessage = "";
-        if(usernameInput.length() == 0){
+        if (usernameInput.length() == 0) {
             errorState = true;
             errorMessage = getString(R.string.username_length_error);
         }
@@ -379,19 +446,17 @@ public class MainActivity extends AppCompatActivity
 //            errorState = true;
 //            errorMessage = getString(R.string.password_length_error);
 //        }
-        else if(!passwordInput.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$")){ // quotes or \" around edges may cause error
+        else if (!passwordInput.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$")) { // quotes or \" around edges may cause error
             errorState = true;
             errorMessage = getString(R.string.password_format_error);
-        }
-        else if(!confirmPasswordInput.equals(passwordInput)){
+        } else if (!confirmPasswordInput.equals(passwordInput)) {
             errorState = true;
             errorMessage = getString(R.string.password_match_error);
-        }
-        else if(!emailInput.matches("[\\da-zA-Z.!#$%&'*+\\-\\/=?^_`{|}~;]{1,}@[\\da-zA-Z]{1,}\\.[\\da-zA-Z\\-]{1,}")){
+        } else if (!emailInput.matches("[\\da-zA-Z.!#$%&'*+\\-\\/=?^_`{|}~;]{1,}@[\\da-zA-Z]{1,}\\.[\\da-zA-Z\\-]{1,}")) {
             errorState = true;
             errorMessage = getString(R.string.email_format_error);
         }
-        if(errorState){
+        if (errorState) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
             alertDialog.setTitle(getString(R.string.error));
             alertDialog.setMessage(errorMessage);
@@ -402,16 +467,16 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
             alertDialog.show();
-        }else{
+        } else {
             String[] parameters = new String[4];
             //String[] parameters = new String[7];
-            parameters[0]= "createUser";
-            parameters[1]=  usernameInput;
-            parameters[2]=  passwordInput;
-            parameters[3]= emailInput;
+            parameters[0] = "createUser";
+            parameters[1] = usernameInput;
+            parameters[2] = passwordInput;
+            parameters[3] = emailInput;
             networkConnection c = new networkConnection(this);
-           // HttpResponse responseGet =
-           String response = String.valueOf(c.execute(parameters));
+            // HttpResponse responseGet =
+            String response = String.valueOf(c.execute(parameters));
 
 //            HttpEntity resEntityGet = responseGet.getEntity();
 //            if (resEntityGet != null) {
@@ -432,41 +497,60 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void navigeteToNewUserView(View view){
+    public void navigeteToNewUserView(View view) {
 
         System.out.println("from navigeteToNewUserView");
-        loginDialog.dismiss();
-        registerDialog = new Dialog(this);
-        registerDialog.setContentView(R.layout.form_register);
-        registerDialog.setCancelable(false);
-        registerDialog.setTitle(getString(R.string.register_banner));
-        TextView titleView = (TextView)registerDialog.findViewById(android.R.id.title);
-        titleView.setGravity(Gravity.CENTER);
-        registerDialog.show();
+        System.out.println("from login");
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
 
+        if (hasReception) {
+            loginDialog.dismiss();
+            registerDialog = new Dialog(this);
+            registerDialog.setContentView(R.layout.form_register);
+            registerDialog.setCancelable(false);
+            registerDialog.setTitle(getString(R.string.register_banner));
+            TextView titleView = (TextView) registerDialog.findViewById(android.R.id.title);
+            titleView.setGravity(Gravity.CENTER);
+            registerDialog.show();
+        } else {
+            displayPopupMessage("No Data Connection, Cannnot Create New User");
+        }
 
     }
 
-    public void logIn(View view){
+    public void logIn(View view) {
 
         System.out.println("from login");
-        EditText usernameEditText = (EditText) loginDialog.findViewById(R.id.loginUsername);
-        EditText passwordEditText = (EditText) loginDialog.findViewById(R.id.loginPassword);
-        String usernameInput = String.valueOf(usernameEditText.getText());
-        String passwordInput = String.valueOf(passwordEditText.getText());
-        String[] parameters = new String[3];
-        parameters[0]= "checkLogin";
-        parameters[1]=  usernameInput;
-        parameters[2]=  passwordInput;
-        networkConnection c = new networkConnection(this);
-        c.execute(parameters);
+        Intent intent = new Intent(BROADCAST);
+        Bundle extras = new Bundle();
+        extras.putString("send_data", "test");
+        intent.putExtras(extras);
+        sendBroadcast(intent);
 
+        if (hasReception) {
+            EditText usernameEditText = (EditText) loginDialog.findViewById(R.id.loginUsername);
+            EditText passwordEditText = (EditText) loginDialog.findViewById(R.id.loginPassword);
+            String usernameInput = String.valueOf(usernameEditText.getText());
+            String passwordInput = String.valueOf(passwordEditText.getText());
+            String[] parameters = new String[3];
+            parameters[0] = "checkLogin";
+            parameters[1] = usernameInput;
+            parameters[2] = passwordInput;
+            networkConnection c = new networkConnection(this);
+            c.execute(parameters);
+        } else {
+            displayPopupMessage("No Data Connection, Cannnot Log In");
+        }
 
         //loginDialog.dismiss();
 
     }
 
-    public void logout(View view){
+    public void logout(View view) {
         curUser = "";
         SharedPreferences settings = getSharedPreferences(PREFS, 0);
         SharedPreferences.Editor editor = settings.edit();
@@ -475,7 +559,6 @@ public class MainActivity extends AppCompatActivity
         editor.commit();
         callLoginDialog();
     }
-
 
 
     private void dispatchTakePictureIntent() {
@@ -525,13 +608,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File("file:" + mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-
+    private void displayPopupMessage(String message) {
+        runOnUiThread(new PopupDisplay(message, this));
     }
 
     @Override
@@ -542,34 +620,24 @@ public class MainActivity extends AppCompatActivity
             //Bitmap bitmap = decodeSampledBitmapFromFile(file.getAbsolutePath(), 1000, 700);
         }
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_TAKE_PHOTO) && resultCode == RESULT_OK) {
-//            if(data != null) {
-//                Bundle extras = data.getExtras();
-//                Bitmap imageBitmap = (Bitmap) extras.get("data");
-//                System.out.println("data is not null in onActivityForResult");
-
-            // File root = Environment.getExternalStorageDirectory();
-            //  Bitmap bMap = BitmapFactory.decodeFile(root+"/images/01.jpg");
-
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            Bitmap bitmap = null;
-            //Bitmap bitmap = BitmapFactory.decodeFile("file:" + mCurrentPhotoPath, options);
-            try {
-                bitmap = BitmapFactory.decodeStream(new FileInputStream(tempImage), null, options);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
 
+
+            Intent intent = new Intent(BROADCAST);
+            Bundle extras = new Bundle();
+            extras.putString("send_data", "test");
+            intent.putExtras(extras);
+            sendBroadcast(intent);
 
             Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
-            //i.putExtra("pictureData", bitmap);
             i.putExtra("pictureData", tempImage);
-
             i.putExtra("recLat", locLat);
             i.putExtra("recLon", locLong);
             i.putExtra("curUser", curUser);
             i.putExtra("curLure", curLure);
+            i.putExtra("hasReception", hasReception);
             startActivityForResult(i, REQUEST_CREATE_RECORD);
 //            mImageView.setImageBitmap(imageBitmap);
 
@@ -647,7 +715,6 @@ public class MainActivity extends AppCompatActivity
 //            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
 
 
-
             System.out.println("Device latitude is : " + locLat);
             System.out.println("Device longitude is : " + locLong);
 
@@ -663,11 +730,12 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(ConnectionResult connectionResult) {
         System.out.println("onConnectionFailed");
     }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         // TODO Auto-generated method stub
         super.onSaveInstanceState(outState);
-        if(mCurrentPhotoPath != null) {
+        if (mCurrentPhotoPath != null) {
             System.out.println(mCurrentPhotoPath);
         }
         //imageView = (ImageView) findViewById(R.id.imageView1);
@@ -681,6 +749,7 @@ public class MainActivity extends AppCompatActivity
         //System.out.println(mCurrentPhotoPath);
         //imageView = (ImageView) findViewById(R.id.imageView1);
     }
+
     private class networkConnection extends AsyncTask<String, Void, String> {
 
         //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
@@ -693,14 +762,14 @@ public class MainActivity extends AppCompatActivity
         HttpClient httpClient = new DefaultHttpClient();
         private MainActivity parent;
 
-        public networkConnection(MainActivity m){
+        public networkConnection(MainActivity m) {
             parent = m;
         }
+
         @Override
         protected String doInBackground(String[] params) {//doInBackground(String[] params) {
             int status = 0;
-
-            if(params[0].equals("createUser")) {
+            if (params[0].equals("createUser")) {
                 try {
                     URL url = new URL(urlString);
                     Map<String, Object> params1 = new LinkedHashMap<>();
@@ -744,8 +813,7 @@ public class MainActivity extends AppCompatActivity
                     System.out.println("exception in createRecord: " + e.getMessage());
                 }
                 return "" + status;
-            }
-            else if(params[0].equals("checkLogin")){
+            } else if (params[0].equals("checkLogin")) {
                 try {
                     URL url = new URL(urlString);
                     Map<String, Object> params1 = new LinkedHashMap<>(); ////
@@ -789,6 +857,68 @@ public class MainActivity extends AppCompatActivity
                 }
                 return "" + status;
 
+            } else if (params[0].equals("uploadRecord")) {
+                try {
+                    URL url = new URL(urlString);
+                    Map<String, Object> params1 = new LinkedHashMap<>(); ////
+                    params1.put("func", "uploadRecord");                   // perhaps make this entire request sending area one function
+                    params1.put("name", params[1]);
+                    params1.put("lat", params[2]);
+                    params1.put("lon", params[3]);                   // perhaps make this entire request sending area one function
+                    params1.put("lure", params[4]);
+                    params1.put("weather", params[5]);
+                    params1.put("species", params[6]);                   // perhaps make this entire request sending area one function
+                    params1.put("time", params[7]);
+                    params1.put("temp", params[8]);
+                    params1.put("path", params[9]);                   // perhaps make this entire request sending area one function
+                    params1.put("user", params[10]);
+                    params1.put("hour", params[11]);
+
+
+                    StringBuilder postData = new StringBuilder();
+                    for (Map.Entry<String, Object> param : params1.entrySet()) {
+                        if (postData.length() != 0) postData.append('&');
+                        postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                        postData.append('=');
+                        postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                    }
+                    byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                    conn.setDoOutput(true);
+                    conn.getOutputStream().write(postDataBytes);
+                    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    status = conn.getResponseCode();
+                    String responseString = "";
+                    for (int c; (c = in.read()) >= 0; ) {
+                        System.out.print((char) c);
+                        responseString += (char) c;
+                    }
+                    final String ops[] = responseString.split("Response:");
+                    if (ops.length > 1) {
+                        if (ops[1].equals("true\"")) {
+                            Record r = new Record(params[1], params[2], params[3],
+                                    params[4], params[5], params[6], params[7],
+                                    params[8], params[10], params[9], params[11]);
+                            dbHandler.changeRecordToUploaded(r);
+
+                        }
+//                        parent.runOnUiThread(new Runnable() {
+//                            public void run() {
+//                                processLoginResult(ops[1], uname);
+//                            }
+//                        });
+
+                    }
+                    System.out.println("Response code is " + status);
+                } catch (Exception e) {
+                    System.out.println("exception in createRecord: " + e.getMessage());
+                }
+                return "" + status;
+
             }
             return "end of function";
         }
@@ -798,4 +928,37 @@ public class MainActivity extends AppCompatActivity
             //processResult(message);
         }
     }
+
+    public class myBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//
+            ConnectivityManager conn = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+
+            // Checks the user prefs and the network connection. Based on the result, decides whether
+            // to refresh the display or keep the current display.
+            // If the userpref is Wi-Fi only, checks to see if the device has a Wi-Fi connection.
+            //WIFI.equals(sPref) &&
+            if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                // Toast.makeText(context, "WIFI CONNECTED", Toast.LENGTH_LONG).show();
+                hasReception = true;
+
+                // If the setting is ANY network and there is a network connection
+                // (which by process of elimination would be mobile), sets refreshDisplay to true.
+            } else if (networkInfo != null) {
+                //Toast.makeText(context, "MOBILE NETWORK CONNECTED", Toast.LENGTH_LONG).show();
+                hasReception = true;
+
+            } else {
+                //Toast.makeText(context, "NO CONNECTION", Toast.LENGTH_LONG).show();
+                hasReception = false;
+            }
+
+
+        }
+    }
+
 }

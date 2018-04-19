@@ -33,14 +33,14 @@ import java.util.Map;
  */
 public class ManageFriendsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private String curUser = "";
-    private String urlString = "http://192.168.1.2:8080/FishLogServlet/DBConectionServlet";// home
+    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
 
     // private String urlString = "http://192.168.3.61:8080/FishLogServlet/DBConectionServlet";// sipnsurf
     // private String urlString = "http://192.168.1.9:8080/FishLogServlet/DBConectionServlet";// javavino
     // private String urlString = "http://192.168.1.5:8080/FishLogServlet/DBConectionServlet";// javavino
     //private String urlString = "http://192.168.44.19:8080/FishLogServlet/DBConectionServlet";// rootnote
     //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
-    // private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,16 +54,78 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
 
     }
 
+    public void beginViewIncomingRequest(View view) {
+        System.out.println("in beginSendRequest");
+        Button sendButton = (Button) findViewById(R.id.sendFriendRequestButton);
+        Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
+        Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
+        RelativeLayout incomingLayout = (RelativeLayout) findViewById(R.id.acceptPendingRequestLayout);
+        Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
+        incomingLayout.setVisibility(View.VISIBLE);
+        sendButton.setVisibility(View.GONE);
+        viewButton.setVisibility(View.GONE);
+        removeButton.setVisibility(View.GONE);
+        incomingButton.setVisibility(View.GONE);
+        networkConnection con = new networkConnection(this);
+        String[] parameters = new String[2];
+        parameters[0] = "viewIncoming";
+        parameters[1] = curUser;
+        con.execute(parameters);
+
+    }
+
+    public void completeAcceptPendingRequest(View view) {
+        System.out.println("in completeAcceptPendingRequest");
+        Spinner incomingSpinner = (Spinner) findViewById(R.id.acceptPendingRequestSpinner);
+        String selectedRequest = incomingSpinner.getSelectedItem().toString();
+
+        networkConnection con = new networkConnection(this);
+        String[] parameters = new String[3];
+        parameters[0] = "acceptRequest";
+        parameters[1] = curUser;
+        parameters[2] = selectedRequest;
+        con.execute(parameters);
+
+    }
+
+    public void populateIncoming(String[] incomingRequests) {
+        System.out.println("in populateIncoming");
+        Spinner incomingSpinner = (Spinner) findViewById(R.id.acceptPendingRequestSpinner);
+        Button acceptButton = (Button) findViewById(R.id.acceptPendingRequestButton);
+        incomingSpinner.setOnItemSelectedListener(this);
+        ArrayList<String> incoming = new ArrayList<String>();
+        if (incomingRequests.length > 0) {
+            if(incomingRequests[0].equalsIgnoreCase("No Incoming Friendship Requests")){
+                acceptButton.setEnabled(false);
+                incoming.add("No Incoming Friendship Requests");
+            }else {
+                for (int i = 0; i < incomingRequests.length; i++) {
+                    incoming.add(incomingRequests[i]);
+                }
+                acceptButton.setEnabled(true);
+            }
+        } else {
+            incoming.add("No Incoming Friendship Requests");
+            acceptButton.setEnabled(false);
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, incoming);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        incomingSpinner.setAdapter(adapter);
+
+    }
+
     public void beginSendRequest(View view) {
         System.out.println("in beginSendRequest");
         Button sendButton = (Button) findViewById(R.id.sendFriendRequestButton);
         Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
         Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
         RelativeLayout sendLayout = (RelativeLayout) findViewById(R.id.sendRequestLayout);
+        Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
         sendLayout.setVisibility(View.VISIBLE);
         sendButton.setVisibility(View.GONE);
         viewButton.setVisibility(View.GONE);
         removeButton.setVisibility(View.GONE);
+        incomingButton.setVisibility(View.GONE);
     }
 
     public void completeRequestFriend(View view) {
@@ -87,10 +149,12 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
         Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
         Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
         RelativeLayout viewLayout = (RelativeLayout) findViewById(R.id.viewFriendsLayout);
+        Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
         viewLayout.setVisibility(View.VISIBLE);
         sendButton.setVisibility(View.GONE);
         viewButton.setVisibility(View.GONE);
         removeButton.setVisibility(View.GONE);
+        incomingButton.setVisibility(View.GONE);
 
         networkConnection con = new networkConnection(this);
         String[] parameters = new String[2];
@@ -107,10 +171,12 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
         Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
         Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
         RelativeLayout RemoveFriendLayout = (RelativeLayout) findViewById(R.id.removeFreindLayout);
+        Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
         RemoveFriendLayout.setVisibility(View.VISIBLE);
         sendButton.setVisibility(View.GONE);
         viewButton.setVisibility(View.GONE);
         removeButton.setVisibility(View.GONE);
+        incomingButton.setVisibility(View.GONE);
 
         networkConnection con = new networkConnection(this);
         String[] parameters = new String[2];
@@ -278,10 +344,12 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
                                     Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
                                     Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
                                     RelativeLayout sendLayout = (RelativeLayout) findViewById(R.id.sendRequestLayout);
+                                    Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
                                     sendLayout.setVisibility(View.GONE);
                                     sendButton.setVisibility(View.VISIBLE);
                                     viewButton.setVisibility(View.VISIBLE);
                                     removeButton.setVisibility(View.VISIBLE);
+                                    incomingButton.setVisibility(View.VISIBLE);
                                 }
                             });
                         } else if (ops[1].equals("1")) {
@@ -360,7 +428,7 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
                     System.out.println("exception in createRecord: " + e.getMessage());
                 }
                 return "" + status;
-            }else if (params[0].equals("deleteFriend")) {
+            } else if (params[0].equals("deleteFriend")) {
                 try {
                     URL url = new URL(urlString);
                     Map<String, Object> params1 = new LinkedHashMap<>();
@@ -403,17 +471,127 @@ public class ManageFriendsActivity extends AppCompatActivity implements AdapterV
                                     Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
                                     Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
                                     RelativeLayout RemoveFriendLayout = (RelativeLayout) findViewById(R.id.removeFreindLayout);
+                                    Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
 
                                     RemoveFriendLayout.setVisibility(View.GONE);
                                     sendButton.setVisibility(View.VISIBLE);
                                     viewButton.setVisibility(View.VISIBLE);
                                     removeButton.setVisibility(View.VISIBLE);
+                                    incomingButton.setVisibility(View.VISIBLE);
                                 }
                             });
                         } else if (ops[1].equals("1")) {
                             displayPopupMessage("This User Is Not Your Friend!!");
                         } else if (ops[1].equals("2")) {
                             displayPopupMessage("Server Error!!");
+                        }
+                    }
+                    System.out.println("Response code is " + status);
+                } catch (Exception e) {
+                    System.out.println("exception in createRecord: " + e.getMessage());
+                }
+                return "" + status;
+            } else if (params[0].equals("viewIncoming")) {
+                try {
+                    URL url = new URL(urlString);
+                    Map<String, Object> params1 = new LinkedHashMap<>();
+                    params1.put("func", "viewIncoming");
+                    params1.put("user", params[1]);
+
+                    StringBuilder postData = new StringBuilder();
+                    for (Map.Entry<String, Object> param : params1.entrySet()) {
+                        if (postData.length() != 0) postData.append('&');
+                        postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                        postData.append('=');
+                        postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                    }
+                    byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                    conn.setDoOutput(true);
+                    conn.getOutputStream().write(postDataBytes);
+                    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    status = conn.getResponseCode();
+                    String responseString = "";
+                    for (int c; (c = in.read()) >= 0; ) {
+                        System.out.print((char) c);
+                        responseString += (char) c;
+                    }
+                    String split1[] = responseString.split("\\$\\$\\$\\$");
+                    //String split2[] = split1[1].split("%%%%");
+                    final String[] ops = split1[1].split("\\^\\^\\^");
+                    ops[ops.length - 1] = ops[ops.length - 1].substring(0, ops[ops.length - 1].length() - 1);
+
+                    parent.runOnUiThread(new Runnable() {
+                            public void run() {
+                                populateIncoming(ops);
+                            }
+                        });
+
+                    System.out.println("Response code is " + status);
+                } catch (Exception e) {
+                    System.out.println("exception in createRecord: " + e.getMessage());
+                }
+                return "" + status;
+            } else if (params[0].equals("acceptRequest")) {
+                try {
+                    URL url = new URL(urlString);
+                    Map<String, Object> params1 = new LinkedHashMap<>();
+                    params1.put("func", "acceptRequest");
+                    params1.put("user", params[1]);
+                    params1.put("requestToAccept", params[2]);
+
+                    StringBuilder postData = new StringBuilder();
+                    for (Map.Entry<String, Object> param : params1.entrySet()) {
+                        if (postData.length() != 0) postData.append('&');
+                        postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                        postData.append('=');
+                        postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                    }
+                    byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                    conn.setDoOutput(true);
+                    conn.getOutputStream().write(postDataBytes);
+                    Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    status = conn.getResponseCode();
+                    String responseString = "";
+                    for (int c; (c = in.read()) >= 0; ) {
+                        System.out.print((char) c);
+                        responseString += (char) c;
+                    }
+                    //responseString = responseString.substring(0, responseString.length() - 1);
+                    final String ops[] = responseString.split("Results:");
+
+
+                    if (ops.length == 2) {
+                        if (ops[1].equals("1")) {
+                            displayPopupMessage("Friendship Request Accepted!!");
+                            parent.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Button sendButton = (Button) findViewById(R.id.sendFriendRequestButton);
+                                    Button viewButton = (Button) findViewById(R.id.viewFreindsButton);
+                                    Button removeButton = (Button) findViewById(R.id.RemoveFriendRequestButton);
+                                    RelativeLayout incomingLayout = (RelativeLayout) findViewById(R.id.acceptPendingRequestLayout);
+                                    Button incomingButton = (Button) findViewById(R.id.ViewIncomingRequestButton);
+
+                                    incomingLayout.setVisibility(View.GONE);
+                                    sendButton.setVisibility(View.VISIBLE);
+                                    viewButton.setVisibility(View.VISIBLE);
+                                    removeButton.setVisibility(View.VISIBLE);
+                                    incomingButton.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        } else if (ops[1].equals("2")) {
+                            displayPopupMessage("Server Error!!");
+                        }else if (ops[1].equals("0")) {
+                            displayPopupMessage("Freindship Not Accepted");
                         }
                     }
                     System.out.println("Response code is " + status);

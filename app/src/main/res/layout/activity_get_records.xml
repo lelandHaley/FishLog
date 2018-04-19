@@ -107,7 +107,7 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dip"
                 android:background="@layout/border"
-                android:hint="Start"
+                android:hint="0"
                 android:visibility="gone" />
 
             <Space
@@ -123,7 +123,7 @@
                 android:layout_marginBottom="10dip"
                 android:layout_toLeftOf="@+id/leftInputField"
                 android:background="@layout/border"
-                android:hint="End"
+                android:hint="24"
                 android:visibility="gone" />
 
 
@@ -260,12 +260,23 @@
             android:layout_centerHorizontal="true"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/currentDisplayText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nextSearchPrevButtonsLayout"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dip"
+                android:text="@string/placeholder"
+                android:textSize="28sp" />
+
 
             <TextView
                 android:id="@+id/editingTextField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/nextSearchPrevButtonsLayout"
+                android:layout_below="@+id/currentDisplayText"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
                 android:gravity="center"
@@ -306,7 +317,7 @@
 
 
             <Space
-                android:id="@+id/filterAndDisplaySeparatorSpace"
+                android:id="@+id/SpaceAboveImageView"
                 android:layout_width="10dp"
                 android:layout_height="60dp" />
 

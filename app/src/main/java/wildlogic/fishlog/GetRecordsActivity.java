@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -48,14 +49,14 @@ public class GetRecordsActivity extends AppCompatActivity implements AdapterView
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-    private String urlString = "http://192.168.1.2:8080/FishLogServlet/DBConectionServlet";// home
+    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
     // private String urlString = "http://192.168.3.61:8080/FishLogServlet/DBConectionServlet";// sipnsurf
    // private String urlString = "http://192.168.1.9:8080/FishLogServlet/DBConectionServlet";// javavino
    // private String urlString = "http://192.168.1.5:8080/FishLogServlet/DBConectionServlet";// javavino
     //private String urlString = "http://192.168.44.19:8080/FishLogServlet/DBConectionServlet";// rootnote
     //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";
-   // private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
     private String user = "";
     private String latitude = "";
     private String longitude = "";
@@ -70,7 +71,7 @@ public class GetRecordsActivity extends AppCompatActivity implements AdapterView
     //String orig = "";
     Semaphore mutex =  new Semaphore(0);
 
-    Record[] currentRecords = null;
+    Record[] currentRecords = new Record[0];
     int currentDisplayedRecordIndex = -1;
 
     public void goBackToMain(View view) {
@@ -228,23 +229,6 @@ public class GetRecordsActivity extends AppCompatActivity implements AdapterView
             }
         }
 
-    }
-
-    class MessageDisplay implements Runnable {
-        String str;
-        MessageDisplay(String s) { str = s; }
-        public void run() {
-            AlertDialog alertDialog = new AlertDialog.Builder(GetRecordsActivity.this).create();
-            alertDialog.setMessage(str);
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                        }
-                    });
-            alertDialog.show();
-        }
     }
 
 private void displayPopupMessage(String message) {
@@ -532,14 +516,19 @@ private void displayPopupMessage(String message) {
 
 
     public void processResult(String result){
-        processRecordString(result);
-
+        if(!result.equals("no records")) {
+            processRecordString(result);
+        }
         System.out.println(result);
         if(currentDisplayedRecordIndex == -1){
             currentDisplayedRecordIndex++;
         }
+        if(currentRecords.length == 0){
+            displayRecord(null);
+        }else{
+            displayRecord(currentRecords[currentDisplayedRecordIndex]);
+        }
 
-        displayRecord(currentRecords[currentDisplayedRecordIndex]);
     }
 
 
@@ -573,11 +562,19 @@ private void displayPopupMessage(String message) {
            // filePath = mSaveBit.getPath()
             try {
                 Bitmap bitmap = BitmapFactory.decodeFile(currentRecords[currentDisplayedRecordIndex].getPath());
+                Space s1 = (Space) findViewById(R.id.SpaceAboveImageView);
+                Space s2 = (Space) findViewById(R.id.SpaceBelowImageView);
+                TextView currDisplay = (TextView) findViewById(R.id.currentDisplayText);
 //                if(bitmap.equals(null)){
+                currDisplay.setText("Displaying Record : " + (currentDisplayedRecordIndex + 1) +" of " + currentRecords.length);
                 if(bitmap == null){
                     img.setVisibility(View.GONE);
+                    s1.setVisibility(View.GONE);
+                    s2.setVisibility(View.GONE);
                 }else{
                     img.setVisibility(View.VISIBLE);
+                    s1.setVisibility(View.VISIBLE);
+                    s2.setVisibility(View.VISIBLE);
                 }
                 img.setImageBitmap(bitmap);
 
@@ -695,9 +692,6 @@ private void displayPopupMessage(String message) {
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
                     conn.setDoOutput(true);
-
-                   // boolean b = conn.
-
                     conn.getOutputStream().write(postDataBytes);
                     Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                     status = conn.getResponseCode();
@@ -706,14 +700,26 @@ private void displayPopupMessage(String message) {
                         System.out.print((char) c);
                         responseString += (char) c;
                     }
-                    final String ops[] = responseString.split("\\$\\$\\$\\$", 2);
-                    if (ops[1] != null) {
-                        parent.runOnUiThread(new Runnable() {
-                            public void run() {
-                                processResult(ops[1]);
+                    final String split[] = responseString.split("responsCode:", 2);
+                    if(split.length > 1){
+                        if(split[1].equals("[\"No Records Matching Search\"]")){
+                            parent.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    processResult("no records");
+                                }
+                            });
+                        }else {
+                            final String ops[] = responseString.split("\\$\\$\\$\\$", 2);
+                            if (ops[1] != null) {
+                                parent.runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        processResult(ops[1]);
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
+
                     System.out.println("Response code is " + status);
                 }  catch (Exception e) {
                     System.out.println("exception in createRecord: " + e.getMessage());
