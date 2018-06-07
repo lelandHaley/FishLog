@@ -2,11 +2,9 @@ package wildlogic.fishlog;
 
 import android.app.Dialog;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -40,18 +38,8 @@ import java.util.Map;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, CompoundButton.OnCheckedChangeListener {
 
-    private GoogleApiClient client;
-    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
-    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
-    // private String urlString = "http://192.168.3.61:8080/FishLogServlet/DBConectionServlet";// sipnsurf
-    // private String urlString = "http://192.168.1.9:8080/FishLogServlet/DBConectionServlet";// javavino
-    // private String urlString = "http://192.168.1.5:8080/FishLogServlet/DBConectionServlet";// javavino
-    //private String urlString = "http://192.168.44.19:8080/FishLogServlet/DBConectionServlet";// rootnote
-    //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";
-    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
     private GoogleMap mMap;
-    private String latitude = "0.0";
-    private String longitude = "0.0";
     private Double lat = 0.0;
     private Double lon = 0.0;
     private Double viewMinLat = 0.0;
@@ -66,8 +54,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private String filterEndtime= "24";
     private boolean filterShowFreindRecords = false;
     private boolean tempFilterShowFreindRecords = false;
+    private boolean showCurrentMarker = true;
     Record[] currentRecords = new Record[0];
-
+    Marker curMarker;
+    MarkerOptions curMarkerOptions;
 
 
     public void goBackToMain(View view) {
@@ -88,6 +78,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         lon = Double.parseDouble((String) getIntent().getExtras().get("curLon"));
     }
 
+    public void showHideCurrentMarker(View view){
+        System.out.println("Recenter Clicked");
+        LatLng curPlace = new LatLng(lat, lon);
+        curMarkerOptions = new MarkerOptions().position(curPlace).title("Current Location");
+        if(showCurrentMarker){
+            curMarker.remove();
+        }else{
+            curMarker = mMap.addMarker(curMarkerOptions);
+        }
+        showCurrentMarker = !showCurrentMarker;
+
+
+    }
     public void recenterMap(View view){
         System.out.println("Recenter Clicked");
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 13.0f));
@@ -121,7 +124,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         networkConnection con = new networkConnection(this);
         String[] parameters = new String[11];
-       // Record curRecord = currentRecords[currentDisplayedRecordIndex];
         parameters[0] = "getRecordsForMap";
         parameters[1] = user;
         parameters[2] = viewMinLat.toString();
@@ -134,7 +136,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         parameters[9] = filterEndtime;
         parameters[10] = String.valueOf(filterShowFreindRecords); // view all user records
 
-        //parameters[3] = filterSelection;
         con.execute(parameters);
 
 
@@ -151,9 +152,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Spinner weatherSpinner = (Spinner) filterDialog.findViewById(R.id.weatherSelectionSpinner);
         EditText starttime = (EditText) filterDialog.findViewById(R.id.leftInputField);
         EditText endtime = (EditText) filterDialog.findViewById(R.id.rightInputField);
-       // Switch viewFreinds = (Switch) filterDialog.findViewById(R.id.viewAllFreindsSwitch);
-//        String tempSpecies = speciesSpinner.getSelectedItem().toString();
-//        String tempWeather = weatherSpinner.getSelectedItem().toString();
         String tempStart = starttime.getText().toString();
         String tempEnd = endtime.getText().toString();
         if(tempStart.equals("")){
@@ -181,7 +179,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void changeFilterButtonClicked(View view) {
         System.out.println("changefilter clicked");
-        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 5.0f));
         callFilterDialog();
     }
     private void callFilterDialog() {
@@ -305,20 +302,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 TextView tText = (TextView) v.findViewById(R.id.info);
                 tTitle.setText(title);
                 tText.setText(snippet);
-                //tText.setTextColor(Color.GREEN);
-
                 return v;
             }
 
         });
 
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         LatLng curPlace = new LatLng(lat, lon);
-        mMap.addMarker(new MarkerOptions().position(curPlace).title("Current Location"));
+        curMarkerOptions = new MarkerOptions().position(curPlace).title("Current Location");
+
+        curMarker = mMap.addMarker(curMarkerOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.0f));
         VisibleRegion vRegion = mMap.getProjection().getVisibleRegion();
         LatLng southwest = vRegion.latLngBounds.southwest;
@@ -339,10 +331,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         runOnUiThread(new PopupDisplay(message, this));
     }
     private void displayRecords(){
-        int markerIndex = 0;
         mMap.clear();
         LatLng curPlace = new LatLng(lat, lon);
-        mMap.addMarker(new MarkerOptions().position(curPlace).title("Current Location"));
+        curMarkerOptions = new MarkerOptions().position(curPlace).title("Current Location");
+        curMarker = mMap.addMarker(curMarkerOptions);
 
         for(Record r: currentRecords) {
             String recordInfo = "Name: "+r.getName() +"\nLure: " + r.getLure() + "\nSpecies: " + r.getSpecies() + "\nWeather: " + r.getWeather() + "\nTime Caught: " + r.getTime() + "\nTemperature " + r.getTemperature();
@@ -351,12 +343,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
             LatLng ltln = new LatLng(Double.parseDouble(r.getLatitude()), Double.parseDouble(r.getLongitude()));
             MarkerOptions m = new MarkerOptions().position(ltln).title(r.getName()).snippet(recordInfo).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-            //currentMarkers[markerIndex] = m;
-            markerIndex++;
             mMap.addMarker(m);
-            //mMap.addMarker(new MarkerOptions().position(mLatLng).title("My Title").snippet("My Snippet"+"\n"+"1st Line Text"+"\n"+"2nd Line Text"+"\n"+"3rd Line Text").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
-          //  mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.0f));
         }
     }
 
@@ -427,9 +414,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onInfoWindowClick(Marker marker) {
         System.out.println("DEBUGGGER");
-
-             //   mMap.addMarker(new MarkerOptions().position(mLatLng).title("My Title").snippet("My Snippet"+"\n"+"1st Line Text"+"\n"+"2nd Line Text"+"\n"+"3rd Line Text").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
     }
 
 
@@ -442,7 +426,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             parent = m;
         }
         @Override
-        protected String doInBackground(String[] params) {//doInBackground(String[] params) {
+        protected String doInBackground(String[] params) {
             int status = 0;
 
             if(params[0].equals("getRecordsForMap")) {
@@ -519,7 +503,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         @Override
         protected void onPostExecute(String message) {
-            //processResult(message);
         }
     }
 }

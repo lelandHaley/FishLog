@@ -12,22 +12,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.os.Looper;
-import android.provider.ContactsContract;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -35,123 +31,42 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.SpinnerAdapter;
-
-
-//import com.android.internal.http.multipart.MultipartEntity;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.gson.Gson;
-import com.survivingwithandroid.weather.lib.WeatherClient;
-import com.survivingwithandroid.weather.lib.WeatherConfig;
-import com.survivingwithandroid.weather.lib.client.volley.WeatherClientDefault;
-
-
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Driver;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 
 public class CreateRecordActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    //String url="jdbc:mysql://localhost:3306/DBNAME";
-    //private String urlString="jdbc:mysql://192.168.0.6:8889/Fishlog";
-    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet"; //home
-    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
-    //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";//not sier what this one is
-    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet"; // virtual server
-    private String driver = "org.gjt.mm.mysql.Driver";
-    //private String username = "uroot";//user must have read-write permission to Database
-   // private String password = "proot";//user password, possible security risk here
-    private String username = "root";//virtual account
-    private String password = "root";
-    private final String BROADCAST = this.getPackageName() + ".android.action.broadcast";
+    private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet"; // virtual server
     String recLat, recLon;
     String curUser = "", curLure = "", recordName = "";
     Bitmap recordImage = null;
     String filePath = "";
     boolean saved = false;
     static final int REQUEST_IMAGE_CAPTURE = 1;
-    WeatherClient wClient = WeatherClientDefault.getInstance();
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
-    final Semaphore mutex = new Semaphore(0);
     private static final String RECORD_SETTINGS = "lureSettings";
     private Dialog workingDialog;
-    private boolean hasReception;
     private DBHandler dbHandler;
-  //  private myBroadcastReceiver myReceiver;
 
 
     /**
@@ -186,8 +101,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
         //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
         // https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/37.8267,-122.4233
-        private static final String OPEN_WEATHER_MAP_URL =
-                "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
+        private static final String OPEN_WEATHER_MAP_URL = "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
 
         HttpURLConnection conn = null;
         private CreateRecordActivity parentActivity = null;
@@ -222,7 +136,6 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
                 // This value will be 404 if the request was not
                 // successful
-//                if (data.getInt("cod") != 200) {
                 if (status != 200) {
                     return null;
                 }
@@ -239,7 +152,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         protected String doInBackground(String[] params) {
             String function = params[0];
             if(function.equals("getWeather")){
-               JSONObject jsonWeather = getWeatherJSON(params[1], params[2]);
+                JSONObject jsonWeather = getWeatherJSON(params[1], params[2]);
                 parentActivity.setWeatherSpinnerSelection(jsonWeather);
                 return "SUCCESS";
 
@@ -248,23 +161,14 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 JSONObject jsonWeather = null;
                 JSONObject currentCond = null;
                 String currTemp = "";
-                String summary = "";
-                //filePath = Environment.getExternalStorageDirectory() + File.separator + recordName;
+
                 try {
                     jsonWeather = getWeatherJSON(params[2], params[3]);
                     currentCond = jsonWeather.getJSONObject("currently");
                     currTemp = currentCond.getString("temperature");
-                    summary = currentCond.getString("summary");
-
 
                 } catch (Exception e) {
                     Log.d("Error", "Cannot process JSON results", e);
-                }
-
-                try {
-                    //  httpclient.execute(httppost);
-                } catch (Exception e) {
-                    System.out.println("Exception: " + e.getMessage());
                 }
 
 
@@ -318,7 +222,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 return response;
             }
             else {
-               return "unknown  function";
+                return "unknown  function";
             }
         }
 
@@ -330,9 +234,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
 
     private void setcreateRecordResponse(String response) {
-        //Looper.prepare();
-// go back to main activity, display message, after addition of saving... dialog, remove dialog
-       // workingDialog.dismiss();
+
         String success = "\"success\"";
         String noConn = "\"noConnection\"";
         if(response.contains(success)){
@@ -350,7 +252,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
                 recordImage.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
                 byte[] bitmapdata = bos.toByteArray();
 
-//write the bytes in file
+                //write the bytes in file
                 FileOutputStream fos = new FileOutputStream(file);
                 fos.write(bitmapdata);
                 fos.flush();
@@ -368,12 +270,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
             saved = true;
             workingDialog.dismiss();
             runOnUiThread(new PopupDisplay("Fish Saved!", this, true));
-           try {
-            mutex.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-            finish();
+
         }else if(response.contains(noConn)){
             runOnUiThread(new PopupDisplay("Could Not Connect To Server", this));
             workingDialog.dismiss();
@@ -407,7 +304,6 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         recLat = (String) getIntent().getExtras().get("recLat");
         recLon = (String) getIntent().getExtras().get("recLon");
         curUser = (String) getIntent().getExtras().get("curUser");
-        hasReception = (boolean) getIntent().getExtras().get("hasReception");
 
 
         Bitmap bitmap = null;
@@ -431,7 +327,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         weatherAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         weatherSpinner.setAdapter(weatherAdapter);
 
-        if(hasReception) {
+        if(isThereReception()) {
             networkConnection c = new networkConnection(this);
             String[] parameters = new String[3];
             parameters[0] = "getWeather";
@@ -449,16 +345,16 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         recordImage = bitmap;
         EditText nameField = (EditText) findViewById(R.id.nameField);
         nameField.setText(tempImage.getName());
+
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         SharedPreferences recordPrefs = getSharedPreferences(RECORD_SETTINGS, 0);
         curLure = recordPrefs.getString("CurrentLure", "");
-       if(!curLure.equals("")){
-           EditText lureField = (EditText) findViewById(R.id.lureField);
-           lureField.setText(curLure);
+        if(!curLure.equals("")){
+            EditText lureField = (EditText) findViewById(R.id.lureField);
+            lureField.setText(curLure);
         }
 
         dbHandler = new DBHandler(this);
-       // myReceiver = new myBroadcastReceiver(this);
 
     }
 
@@ -523,6 +419,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         Spinner speciesSpinner = (Spinner) findViewById(R.id.speciesSpinner);
         EditText nameField = (EditText) findViewById(R.id.nameField);
         String recName = nameField.getText().toString();
+        recordName = recName;
         EditText lureField = (EditText) findViewById(R.id.lureField);
         Spinner weatherSpinner = (Spinner) findViewById(R.id.weatherSpinner);
         String recLure = lureField.getText().toString();
@@ -531,14 +428,7 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         curLure = recLure;
         filePath = Environment.getExternalStorageDirectory() + File.separator + recordName;
 
-
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if(hasReception) {
+        if(isThereReception()) {
 
             String[] parameters = new String[9];
             //String[] parameters = new String[7];
@@ -557,20 +447,40 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
             networkConnection c = new networkConnection(this);
             c.execute(parameters);
         }else{
-           // db.insert(dbhelper.getDatabaseName(),null,null);
+            // db.insert(dbhelper.getDatabaseName(),null,null);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd:HH:mm");
             String time = sdf.format(new Date());
             SimpleDateFormat sdf2 = new SimpleDateFormat("HH");
             String hours = sdf2.format(new Date());
             Record r = new Record(recName, recLat, recLon, recLure, recWeather, recSpecies, time, "0.0", curUser, filePath, hours);
             long l = dbHandler.addUnsavedRecord(r);
+            try{
+                File file = new File(filePath);
+                file.createNewFile();
+
+                //Convert bitmap to byte array
+                //Bitmap bitmap = your bitmap;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                recordImage.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+//write the bytes in file
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(bitmapdata);
+                fos.flush();
+                fos.close();
+
+
+            }catch(java.io.IOException ioe){
+                System.out.println(ioe.getMessage());
+            }
             workingDialog.dismiss();
             if(l >= 0){
-                displayPopupMessage("No Data Connection, Data Saved Locally Until Data Connection Is Regained");
-                finish();
+                displayFinishPopupMessage("No Data Connection, Data Saved Locally Until Data Connection Is Regained");
+                //finish();
             }else{
-                displayPopupMessage("No Data Connection, Error Saving Record Locally");
-                finish();
+                displayFinishPopupMessage("No Data Connection, Error Saving Record Locally");
+                //finish();
             }
 
         }
@@ -579,6 +489,9 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
 
     private void displayPopupMessage(String message) {
         runOnUiThread(new PopupDisplay(message, this));
+    }
+    private void displayFinishPopupMessage(String message) {
+        runOnUiThread(new PopupDisplay(message, this, true));
     }
     @Override
     public void onStart() {
@@ -607,27 +520,16 @@ public class CreateRecordActivity extends AppCompatActivity implements GoogleApi
         client.disconnect();
     }
 
-    public class myBroadcastReceiver extends BroadcastReceiver {
-//        CreateRecordActivity parent;
-//
-//        public myBroadcastReceiver(CreateRecordActivity a){
-//            parent = a;
-//        }
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ConnectivityManager conn =  (ConnectivityManager)
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
-            if ( networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                // Toast.makeText(context, "WIFI CONNECTED", Toast.LENGTH_LONG).show();
-                hasReception = true;
-            } else if (networkInfo != null) {
-                //Toast.makeText(context, "MOBILE NETWORK CONNECTED", Toast.LENGTH_LONG).show();
-                hasReception = true;
-            } else {
-                //Toast.makeText(context, "NO CONNECTION", Toast.LENGTH_LONG).show();
-                hasReception = false;
-            }
+    public boolean isThereReception() {
+        ConnectivityManager conn = (ConnectivityManager)
+                this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            return true;
+        } else if (networkInfo != null) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

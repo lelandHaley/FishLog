@@ -11,26 +11,6 @@
     tools:context="wildlogic.fishlog.MainActivity"
     android:layout_centerHorizontal="true">
 
-
-    <!--android:layout_gravity="center"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
-    <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
-    <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
-    <!--android:paddingTop="@dimen/activity_vertical_margin"-->
-
-    <!---->
-    <!--android:focusable="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:focusableInTouchMode="true">-->
-    <!--android:orientation="vertical"-->
-
-    <!--<Space-->
-        <!--android:id="@+id/nextAndSearchSpace"-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="70dp" />-->
-
     <TextView
         android:layout_margin="10dp"
         android:layout_width="wrap_content"
@@ -57,9 +37,7 @@
         android:height="70px"
         android:width="340px"
         android:layout_margin="10dp"/>
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
+
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -121,21 +99,6 @@
         android:onClick="viewMap"
         android:layout_margin="10dp"/>
 
-    <!--<Button-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/manage_request"-->
-        <!--android:layout_below="@+id/weatherbutton"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:textSize="24sp"-->
-        <!--android:height="70px"-->
-        <!--android:width="340px"-->
-        <!--android:id="@+id/freindbutton"-->
-        <!--android:onClick="manageFreinds"-->
-        <!--android:layout_margin="10dp"/>-->
-
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
@@ -170,30 +133,8 @@
 
             android:text="@string/poweredByText"
             android:textSize="20sp"/>
-        <!--android:layout_below="@+id/precip_chance_field"
-         android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:gravity="center"-->
+
 
     </RelativeLayout>
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
-
-
-    <!--<EditText-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:id="@+id/pictureNameInput"-->
-        <!--android:layout_below="@+id/weatherbutton"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_marginBottom="49dp"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentEnd="true" />-->
-    <!--android:hint="@string/enter_name_field_placeholder"-->
-
-
 
 </RelativeLayout>

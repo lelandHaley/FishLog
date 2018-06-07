@@ -1,76 +1,44 @@
 package wildlogic.fishlog;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.BreakIterator;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -78,15 +46,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import wildlogic.*;
-import wildlogic.fishlog.R;
 
 public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks
@@ -99,42 +62,23 @@ public class MainActivity extends AppCompatActivity
     static final int REQUEST_GET_WEATHER = 1;
     static final int REQUEST_MANAGE_FRIENDS = 1;
     static final int REQUEST_VIEW_MAP = 1;
-    static final int REQUEST_LOGIN_PROMPT = 1;
-    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
-    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
-    //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";
-    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
-    //private String urlString = "http://192.168.3.55:8080/FishLogServlet/DBConectionServlet";//sip n' surf
+
+    private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
 
 
-    private final String BROADCAST = this.getPackageName() + ".android.action.broadcast";
     public String mCurrentPhotoPath;
-
-    //private FusedLocationProviderClient mFusedLocationClient;
-    //private LocationClient locationclient;
-    //private FusedLocationProviderClient mFusedLocationClient;
-    private LocationRequest locationRequest;
 
 
     private String locLat, locLong;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private Uri mUri;
     private File tempImage;
     private Dialog loginDialog;
     private Dialog registerDialog;
     String curUser, curLure = "";
     private Record[] recordsToSend;
-    TelephonyManager myTelephonyManager;
-    PhoneStateListener callStateListener;
-    myBroadcastReceiver myReceiver;
     DBHandler dbHandler;
-    //MyBroadcastReceiver myReceiver;
-    //private boolean hasWiFi = true;
-    // private boolean hasCellReception = true;
-    private boolean hasReception = false;
 
-    public static final String TAG = MainActivity.class.getSimpleName();
     private static final String PREFS = "prefFile";
 
     @Override
@@ -158,13 +102,6 @@ public class MainActivity extends AppCompatActivity
             System.out.println(check);
         }
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
 
@@ -172,7 +109,6 @@ public class MainActivity extends AppCompatActivity
 
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (location != null) {
-            //location.
             locLat = String.valueOf(location.getLatitude());
             locLong = String.valueOf(location.getLongitude());
             System.out.println("Device latitude is : " + locLat);
@@ -192,29 +128,14 @@ public class MainActivity extends AppCompatActivity
             callLoginDialog();
         }
 
-
         System.out.println(mGoogleApiClient.toString());
-
-
         dbHandler = new DBHandler(this);
-        myReceiver = new myBroadcastReceiver();
-
-        IntentFilter intentFilter = new IntentFilter(BROADCAST);
-        registerReceiver(myReceiver, intentFilter);
-
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
     }
 
     public void uploadRecords() {
         recordsToSend = dbHandler.getRecords();
         for (Record r : recordsToSend) {
             String[] parameters = new String[12];
-            //String[] parameters = new String[7];
-
             parameters[0] = "uploadRecord";
             parameters[1] = r.getName();
             parameters[2] = r.getLatitude();
@@ -229,20 +150,13 @@ public class MainActivity extends AppCompatActivity
             parameters[11] = r.getHour();
 
             networkConnection c = new networkConnection(this);
-            // HttpResponse responseGet =
             String response = String.valueOf(c.execute(parameters));
-//            String response = String.valueOf(c.execute(parameters));
         }
     }
 
     public void viewMap(View view) {
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
 
-        if (hasReception) {
+        if (isThereReception()) {
             System.out.println("viewing map");
             uploadRecords();
             Intent i = new Intent(getApplicationContext(), MapActivity.class);
@@ -260,13 +174,7 @@ public class MainActivity extends AppCompatActivity
     public void manageFreinds(View view) {
         System.out.println("Going to manage friends page");
 
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if (hasReception) {
+        if (isThereReception()) {
             uploadRecords();
             Intent i = new Intent(getApplicationContext(), ManageFriendsActivity.class);
             i.putExtra("curUser", curUser);
@@ -284,18 +192,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getWeather(View view) {
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if (hasReception) {
+        if (isThereReception()) {
             uploadRecords();
             System.out.println("Getting Weather");
             Intent i = new Intent(getApplicationContext(), GetWeatherActivity.class);
-            //i.putExtra("pictureData", bitmap);
-
             i.putExtra("recLat", locLat);
             i.putExtra("recLon", locLong);
             startActivityForResult(i, REQUEST_GET_WEATHER);
@@ -305,15 +205,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getRecords(View view) {
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if (hasReception) {
-            //Record r = new Record("testName", "2.2", "3.3", "TESTLure", "testWeather", "TestSpecies", "10:10:10:10:10", "0.0", curUser, "//frfrf", "10");
-            // long l = dbHandler.addUnsavedRecord(r);
+        if (isThereReception()) {
             uploadRecords();
 
             System.out.println("Getting Records");
@@ -332,9 +224,7 @@ public class MainActivity extends AppCompatActivity
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        //File pictureFile = new File(Environment.getExternalStorageDirectory() + "/imageFileName");
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //  File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         System.out.println("Environment.DIRECTORY_PICTURES is " + Environment.getExternalStorageDirectory());
         System.out.println("getExternalFilesDir is " + getExternalFilesDir(Environment.DIRECTORY_PICTURES));
         File image = File.createTempFile(
@@ -359,12 +249,11 @@ public class MainActivity extends AppCompatActivity
         loginDialog.setCancelable(false);
         TextView titleView = (TextView) loginDialog.findViewById(android.R.id.title);
         titleView.setGravity(Gravity.CENTER);
-
         loginDialog.setTitle(getString(R.string.login_banner));
         loginDialog.show();
     }
 
-    private void processResult(String message) {
+    private void processResult(String message, String username) {
         AlertDialog infoDialog = new AlertDialog.Builder(MainActivity.this).create();
 
         infoDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -375,7 +264,8 @@ public class MainActivity extends AppCompatActivity
                 });
 
         if (message.equals("0")) {
-            infoDialog.setMessage("Success, You Should Be Recieving A Confirmation Email Shortly");
+            infoDialog.setMessage("Success, You Should Be Receiving A Confirmation Email Shortly");
+            curUser = username;
             registerDialog.dismiss();
         } else if (message.equals("1")) {
             infoDialog.setMessage("The Provided Username Already Exists In The Database");
@@ -442,10 +332,6 @@ public class MainActivity extends AppCompatActivity
             errorState = true;
             errorMessage = getString(R.string.username_length_error);
         }
-//        else if(passwordInput.length() < 6){
-//            errorState = true;
-//            errorMessage = getString(R.string.password_length_error);
-//        }
         else if (!passwordInput.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$")) { // quotes or \" around edges may cause error
             errorState = true;
             errorMessage = getString(R.string.password_format_error);
@@ -469,29 +355,12 @@ public class MainActivity extends AppCompatActivity
             alertDialog.show();
         } else {
             String[] parameters = new String[4];
-            //String[] parameters = new String[7];
             parameters[0] = "createUser";
             parameters[1] = usernameInput;
             parameters[2] = passwordInput;
             parameters[3] = emailInput;
             networkConnection c = new networkConnection(this);
-            // HttpResponse responseGet =
-            String response = String.valueOf(c.execute(parameters));
-
-//            HttpEntity resEntityGet = responseGet.getEntity();
-//            if (resEntityGet != null) {
-//                //do something with the response
-//                Log.i("GET RESPONSE", EntityUtils.toString(resEntityGet));
-//            }
-//            try {
-//                .get();
-//                //String result = c.get();
-//                System.out.println(resultString);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            }
+            c.execute(parameters);
         }
 
 
@@ -501,13 +370,7 @@ public class MainActivity extends AppCompatActivity
 
         System.out.println("from navigeteToNewUserView");
         System.out.println("from login");
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if (hasReception) {
+        if (isThereReception()) {
             loginDialog.dismiss();
             registerDialog = new Dialog(this);
             registerDialog.setContentView(R.layout.form_register);
@@ -523,15 +386,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void logIn(View view) {
-
-        System.out.println("from login");
-        Intent intent = new Intent(BROADCAST);
-        Bundle extras = new Bundle();
-        extras.putString("send_data", "test");
-        intent.putExtras(extras);
-        sendBroadcast(intent);
-
-        if (hasReception) {
+        if(isThereReception()){
             EditText usernameEditText = (EditText) loginDialog.findViewById(R.id.loginUsername);
             EditText passwordEditText = (EditText) loginDialog.findViewById(R.id.loginPassword);
             String usernameInput = String.valueOf(usernameEditText.getText());
@@ -545,8 +400,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             displayPopupMessage("No Data Connection, Cannnot Log In");
         }
-
-        //loginDialog.dismiss();
 
     }
 
@@ -581,15 +434,7 @@ public class MainActivity extends AppCompatActivity
                         "wildlogic.fishlog.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//
-//                mUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
-//                        //"pic"+ String.valueOf(System.currentTimeMillis()) + ".jpg"));
-//                        photoURI.getEncodedPath() + ".jpg"));
-//
-//                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mUri);
-//
-                // Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 } else {
@@ -617,7 +462,6 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == 1777) {
             //Get our saved file into a bitmap object:
             File file = new File(Environment.getExternalStorageDirectory() + File.separator + "image.jpg");
-            //Bitmap bitmap = decodeSampledBitmapFromFile(file.getAbsolutePath(), 1000, 700);
         }
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_TAKE_PHOTO) && resultCode == RESULT_OK) {
 
@@ -625,11 +469,8 @@ public class MainActivity extends AppCompatActivity
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
 
-            Intent intent = new Intent(BROADCAST);
-            Bundle extras = new Bundle();
-            extras.putString("send_data", "test");
-            intent.putExtras(extras);
-            sendBroadcast(intent);
+
+           boolean hasReception = isThereReception();
 
             Intent i = new Intent(getApplicationContext(), CreateRecordActivity.class);
             i.putExtra("pictureData", tempImage);
@@ -639,19 +480,23 @@ public class MainActivity extends AppCompatActivity
             i.putExtra("curLure", curLure);
             i.putExtra("hasReception", hasReception);
             startActivityForResult(i, REQUEST_CREATE_RECORD);
-//            mImageView.setImageBitmap(imageBitmap);
 
         }
-//        if (requestCode == PICK_CONTACT_REQUEST) {
-//            if (resultCode == RESULT_OK) {
-//                // A contact was picked.  Here we will just display it
-//                // to the user.
-//                startActivity(new Intent(Intent.ACTION_VIEW, data));
-//            }
-//        }
-        //galleryAddPic();
     }
 
+    public boolean isThereReception() {
+        ConnectivityManager conn = (ConnectivityManager)
+                this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            return true;
+        } else if (networkInfo != null) {
+            return true;
+
+        } else {
+            return false;
+        }
+    }
 
     protected void onStart() {
         System.out.println("in onStart");
@@ -710,11 +555,6 @@ public class MainActivity extends AppCompatActivity
 
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-//            BreakIterator mLatitudeText = null;
-//            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-//            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-
-
             System.out.println("Device latitude is : " + locLat);
             System.out.println("Device longitude is : " + locLong);
 
@@ -738,22 +578,16 @@ public class MainActivity extends AppCompatActivity
         if (mCurrentPhotoPath != null) {
             System.out.println(mCurrentPhotoPath);
         }
-        //imageView = (ImageView) findViewById(R.id.imageView1);
-
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         super.onRestoreInstanceState(savedInstanceState);
-        //System.out.println(mCurrentPhotoPath);
-        //imageView = (ImageView) findViewById(R.id.imageView1);
     }
 
     private class networkConnection extends AsyncTask<String, Void, String> {
 
-        //"http://api.openweathermap.org/data/2.5/weather?lat=%slon=%sunits=metric";
-        // https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/37.8267,-122.4233
         private static final String OPEN_WEATHER_MAP_URL =
                 "https://api.darksky.net/forecast/5411c439cc32573f9f153a02d54a19a4/%s,%s";
 
@@ -801,10 +635,11 @@ public class MainActivity extends AppCompatActivity
                         responseString += (char) c;
                     }
                     final String ops[] = responseString.split(".*:");
+                    final String uname = params[1];
                     if (ops[1] != null) {
                         parent.runOnUiThread(new Runnable() {
                             public void run() {
-                                processResult(ops[1]);
+                                processResult(ops[1],uname);
                             }
                         });
                     }
@@ -853,7 +688,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     System.out.println("Response code is " + status);
                 } catch (Exception e) {
-                    System.out.println("exception in createRecord: " + e.getMessage());
+                    System.out.println("exception in createRecord: " + e.toString());
                 }
                 return "" + status;
 
@@ -906,11 +741,6 @@ public class MainActivity extends AppCompatActivity
                             dbHandler.changeRecordToUploaded(r);
 
                         }
-//                        parent.runOnUiThread(new Runnable() {
-//                            public void run() {
-//                                processLoginResult(ops[1], uname);
-//                            }
-//                        });
 
                     }
                     System.out.println("Response code is " + status);
@@ -925,40 +755,8 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String message) {
-            //processResult(message);
         }
     }
 
-    public class myBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-//
-            ConnectivityManager conn = (ConnectivityManager)
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
-
-            // Checks the user prefs and the network connection. Based on the result, decides whether
-            // to refresh the display or keep the current display.
-            // If the userpref is Wi-Fi only, checks to see if the device has a Wi-Fi connection.
-            //WIFI.equals(sPref) &&
-            if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                // Toast.makeText(context, "WIFI CONNECTED", Toast.LENGTH_LONG).show();
-                hasReception = true;
-
-                // If the setting is ANY network and there is a network connection
-                // (which by process of elimination would be mobile), sets refreshDisplay to true.
-            } else if (networkInfo != null) {
-                //Toast.makeText(context, "MOBILE NETWORK CONNECTED", Toast.LENGTH_LONG).show();
-                hasReception = true;
-
-            } else {
-                //Toast.makeText(context, "NO CONNECTION", Toast.LENGTH_LONG).show();
-                hasReception = false;
-            }
-
-
-        }
-    }
 
 }

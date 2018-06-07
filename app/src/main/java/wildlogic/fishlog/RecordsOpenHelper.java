@@ -42,9 +42,6 @@ public class RecordsOpenHelper extends SQLiteOpenHelper {
                     COLUMN_UPLOADED + " TEXT)";
 
 
-    public RecordsOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, DATABASE_NAME, factory, version);
-    }
 
     public RecordsOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

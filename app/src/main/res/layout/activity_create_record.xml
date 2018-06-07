@@ -3,111 +3,157 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto">
-    <!-- Here you put the rest of your current view-->
+    android:orientation="vertical"
+    android:layout_centerHorizontal="true"
+    android:layout_gravity="center">
 
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:orientation="vertical"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
         tools:context="wildlogic.fishlog.CreateRecordActivity">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
+        </LinearLayout>
 
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
+        <TextView
+            android:layout_alignParentTop="true"
+            android:id="@+id/createRecordTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
+            android:text="Record Information: "
+            android:textSize="32sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
 
-
-
-
+        <Space
+            android:id="@+id/SpaceAboveImage"
+            android:layout_width="10dp"
+            android:layout_height="70dp"
+            android:layout_below="@+id/createRecordTitle"/>
 
         <ImageView
-            android:layout_width="220dp"
-            android:layout_height="360dp"
-        android:id="@+id/picture_preview_view"
-            android:layout_marginLeft="60dip"
-        android:layout_marginRight="60dip"/>
+            android:id="@+id/picture_preview_view"
+            android:layout_width="wrap_content"
+            android:layout_height="300px"
+            android:rotation="90"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_below="@+id/SpaceAboveImage"/>
+
+        <Space
+            android:id="@+id/SpaceBelowImage"
+            android:layout_width="10dp"
+            android:layout_height="60dp"
+            android:layout_below="@+id/picture_preview_view"/>
 
 
+        <TextView
+            android:id="@+id/picturePreviewText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/SpaceBelowImage"
+            android:text="Picture Name: "
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:id="@+id/nameField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dip"
+            android:layout_below="@+id/picturePreviewText"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/lureText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lure_used"
+            android:layout_below="@+id/nameField"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:id="@+id/lureField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dip"
+            android:layout_below="@+id/lureText"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/speciesText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Species of Fish: "
+            android:layout_below="@+id/lureField"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
+
+        <Spinner
+            android:id="@+id/speciesSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dip"
+            android:layout_below="@+id/speciesText"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
 
 
-                <TextView android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Picture Name: "
-                    android:layout_marginBottom="10dip"/>
-
-                <EditText android:id="@+id/nameField"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dip"/>
-
-                <TextView android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Species of Fish: "/>
-
-                <Spinner
-                    android:id="@+id/speciesSpinner"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dip"/>
-
-
-             <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                   android:text="@string/lure_used" />
-
-            <EditText android:id="@+id/lureField"
-                  android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                android:layout_marginBottom="10dip"/>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/weather_conditions"
-                    />
+        <TextView
+            android:id="@+id/weatherText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/weather_conditions"
+            android:layout_below="@+id/speciesSpinner"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
 
         <Spinner
             android:id="@+id/weatherSpinner"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dip"/>
-                <!--<EditText android:id="@+id/weatherField"-->
-                    <!--android:layout_width="fill_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginBottom="10dip"/>-->
+            android:layout_marginBottom="12dip"
+            android:layout_below="@+id/weatherText"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"/>
 
-        <!--<com.mapbox.mapboxsdk.maps.MapView-->
-            <!--android:id="@+id/mapView"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--mapbox:style_url="mapbox://styles/mapbox/satellite-v9"-->
-            <!--mapbox:center_latitude="45.9069"-->
-            <!--mapbox:center_longitude="91.1089"-->
-            <!--mapbox:zoom="11"/>-->
-
-        <!--<fragment-->
-            <!--class="com.google.android.gms.maps.MapFragment"-->
-            <!--android:id="@+id/mapFragment"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"/>-->
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/create_record_button_text"
-        android:id="@+id/picturebutton"
-        android:onClick="createRecord"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-    </LinearLayout>
+        <Button
+            android:id="@+id/picturebutton"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:width="140px"
+            android:height="50px"
+            android:onClick="createRecord"
+            android:text="@string/create_record_button_text"
+            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_below="@+id/weatherSpinner"/>
+    </RelativeLayout>
 </ScrollView>

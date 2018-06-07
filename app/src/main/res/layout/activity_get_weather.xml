@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
 
-
-<!--xmlns:tools="http://schemas.android.com/tools"--><!--android:orientation="vertical"--><!--android:layout_width="fill_parent"--><!--android:layout_height="fill_parent"--><!--android:paddingLeft="@dimen/activity_horizontal_margin"--><!--android:paddingRight="@dimen/activity_horizontal_margin"--><!--android:paddingTop="@dimen/activity_vertical_margin"--><!--tools:context="wildlogic.fishlog.GetWeatherActivity">-->
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,27 +11,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="wildlogic.fishlog.GetWeatherActivity">
-    <!--tools:context="ah.hathi.simpleweather.WeatherActivity$PlaceholderFragment">-->
 
-
-    <!--<TextView-->
-    <!--android:id="@+id/weather_icon"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_centerVertical="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
-    <!--android:textSize="70sp"-->
-    <!--/>-->
-
-
-    <!--<TextView-->
-    <!--android:id="@+id/city"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentTop="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -57,9 +34,7 @@
         android:layout_gravity="center"
         android:text="@string/summary"
         android:textSize="32sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
-    <!--//android:layout_alignParentTop="true"-->
-    <!--android:layout_centerHorizontal="true"-->
+
 
 
     <TextView
@@ -71,7 +46,6 @@
         android:layout_gravity="center"
         android:paddingBottom="10dp"
         android:textSize="28sp"/>
-        <!--//android:textAppearance="?android:attr/textAppearanceMedium" />-->
 
     <TextView
         android:id="@+id/cur_temp_string"
@@ -82,7 +56,6 @@
         android:layout_gravity="center"
         android:text="@string/curr_temp"
         android:textSize="32sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
 
     <TextView
         android:id="@+id/current_temperature_field"
@@ -93,8 +66,6 @@
         android:layout_gravity="center"
         android:paddingBottom="10dp"
         android:textSize="28sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
-    <!--android:textSize="40sp" />-->
 
     <TextView
         android:id="@+id/cloud_cover_string"
@@ -105,7 +76,6 @@
         android:layout_gravity="center"
         android:text="@string/cloud_cover"
         android:textSize="32sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
 
     <TextView
         android:id="@+id/cloud_cover_field"
@@ -116,8 +86,7 @@
         android:layout_gravity="center"
         android:paddingBottom="10dp"
         android:textSize="28sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
-    <!--android:textSize="13sp" />-->
+
 
     <TextView
         android:id="@+id/wind_speed_string"
@@ -128,7 +97,6 @@
         android:layout_gravity="center"
         android:text="@string/wind_speed"
         android:textSize="32sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
 
     <TextView
         android:id="@+id/wind_speed_field"
@@ -138,8 +106,6 @@
         android:layout_centerHorizontal="true"
         android:paddingBottom="10dp"
         android:textSize="28sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
-    <!--android:layout_below="@+id/weather_icon"-->
 
     <TextView
         android:id="@+id/precip_chance_string"
@@ -150,7 +116,6 @@
         android:layout_gravity="center"
         android:text="@string/precip_chance"
         android:textSize="32sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
 
     <TextView
         android:id="@+id/precip_chance_field"
@@ -160,7 +125,6 @@
         android:layout_centerHorizontal="true"
         android:paddingBottom="10dp"
         android:textSize="28sp"/>
-        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
@@ -180,10 +144,5 @@
             android:textSize="20sp"
             android:onClick="goBackToMain"/>
 
-        <!--android:layout_below="@+id/precip_chance_field"-->
-
     </RelativeLayout>
 </RelativeLayout>
-
-
-    <!--</LinearLayout>-->

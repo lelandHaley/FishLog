@@ -30,7 +30,7 @@
     <string name="error">Error</string>
     <string name="username_length_error">Username Must Be At Least 1 Character Long</string>
     <string name="password_length_error">Password Must Be At Least 8 Characters Long</string>
-    <string name="password_format_error">Password Must Contain At Least 8 Characters, At Least 1 Letter, And At Least 1 Number, And At Least 1 Special Character</string>
+    <string name="password_format_error">Password Must Contain At Least 8 Characters, At Least 1 Letter, At Least 1 Number, And At Least 1 Special Character</string>
     <string name="password_match_error">Passwords Do Not Match</string>
     <string name="email_format_error">Invalid Email Format</string>
     <string name="logout">Log Out</string>
@@ -75,7 +75,7 @@
     <string name="recenter">Recenter</string>
     <string name="refresh">Refresh Map</string>
     <string name="change_filter">Change Filter</string>
-    <string name="filter_map_title">\t\t\t\t\tEdit Record Display Filter</string>
+    <string name="filter_map_title">\t\t\t\tEdit Record Display Filter Settings</string>
     <string name="speciesFilterText">Select Species</string>
     <string name="viewAllFilterText">View Records From All Friends</string>
     <string name="weatherFilterText">Select Weather Condition</string>
@@ -84,30 +84,8 @@
     <string name="save_filter_button_text">Save</string>
     <string name="select_pending_request">Select Pending Request From Other Users To Accept</string>
     <string name="accept_pending_request">Accept Request</string>
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-    <!--<string name=""></string>-->
-
-
-
-
-
-
-
-
+    <string name="decline_pending_request">Decline Request</string>
+    <string name="show_hide_current_location">Show/Hide Location</string>
 
     <string-array name="fish_species_array">
         <item>Muskellunge</item>
@@ -121,7 +99,6 @@
         <item>Panfish</item>
     </string-array>
 
-    fish_species_array_all_included
 
     <string-array name="filter_records_by_attribute_array">
         <item>No Filter</item>

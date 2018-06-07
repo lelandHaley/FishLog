@@ -38,7 +38,6 @@ public class PopupDisplay implements Runnable {
                         public void onClick(DialogInterface dialog, int which) {
                             activity.finish();
                             dialog.dismiss();
-                            //activity.finish();
                         }
                     });
         }

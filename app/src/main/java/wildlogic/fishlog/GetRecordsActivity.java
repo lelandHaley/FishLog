@@ -49,14 +49,14 @@ public class GetRecordsActivity extends AppCompatActivity implements AdapterView
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-    private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
+    //private String urlString = "http://192.168.1.6:8080/FishLogServlet/DBConectionServlet";// home
    //private String urlString = "http://192.168.1.13:8080/FishLogServlet/DBConectionServlet"; //tylers
     // private String urlString = "http://192.168.3.61:8080/FishLogServlet/DBConectionServlet";// sipnsurf
    // private String urlString = "http://192.168.1.9:8080/FishLogServlet/DBConectionServlet";// javavino
    // private String urlString = "http://192.168.1.5:8080/FishLogServlet/DBConectionServlet";// javavino
     //private String urlString = "http://192.168.44.19:8080/FishLogServlet/DBConectionServlet";// rootnote
     //private String urlString = "http://138.49.3.45:8080/FishLogServlet/DBConectionServlet";
-    //private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
+    private String urlString = "http://138.49.101.89:80/FishLogServlet/DBConectionServlet";//virtual server
     private String user = "";
     private String latitude = "";
     private String longitude = "";
@@ -92,74 +92,80 @@ public class GetRecordsActivity extends AppCompatActivity implements AdapterView
             EditText timeField = (EditText) findViewById(R.id.displayTimeField);
             EditText tempField = (EditText) findViewById(R.id.displayTempField);
             EditText userField = (EditText) findViewById(R.id.displayUserField);
+            String uname = userField.getText().toString();
 
         if(editButton.getText().equals("Edit")) {
+            if(uname.equals(user)) {
+                origName = nameField.getText().toString();
+                origLat = latField.getText().toString();
+                origLon = longField.getText().toString();
+                origLure = lureField.getText().toString();
+                origWeather = weatherField.getText().toString();
+                origSpecies = speciesField.getText().toString();
+                origTime = timeField.getText().toString();
+                origTemp = tempField.getText().toString();
 
-            origName = nameField.getText().toString();
-            origLat = latField.getText().toString();
-            origLon = longField.getText().toString();
-            origLure = lureField.getText().toString();
-            origWeather = weatherField.getText().toString();
-            origSpecies = speciesField.getText().toString();
-            origTime = timeField.getText().toString();
-            origTemp = tempField.getText().toString();
+                editingText.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.GONE);
+                editButton.setText("Finished Edititng");
+                editButton.setHeight(90);
 
-            editingText.setVisibility(View.VISIBLE);
-            deleteButton.setVisibility(View.GONE);
-            editButton.setText("Finished Edititng");
-            editButton.setHeight(90);
+                nameField.setEnabled(true);
+                latField.setEnabled(true);
+                longField.setEnabled(true);
+                lureField.setEnabled(true);
+                weatherField.setEnabled(true);
+                speciesField.setEnabled(true);
+                timeField.setEnabled(true);//may need validation for time
+                final EditText tempTimeField = timeField;
 
-            nameField.setEnabled(true);
-            latField.setEnabled(true);
-            longField.setEnabled(true);
-            lureField.setEnabled(true);
-            weatherField.setEnabled(true);
-            speciesField.setEnabled(true);
-            timeField.setEnabled(true);//may need validation for time
-            final EditText tempTimeField = timeField;
+                tempTimeField.addTextChangedListener(new TextWatcher() {
+                    String valid_time = null;
 
-            tempTimeField.addTextChangedListener(new TextWatcher() {
-                String valid_time = null;
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before,
-                                          int count) {
-                    // TODO Auto-generated method stub
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before,
+                                              int count) {
+                        // TODO Auto-generated method stub
 
-                }
-
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count,
-                                              int after) {
-                    // TODO Auto-generated method stub
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    // TODO Auto-generated method stub
-
-                    // TODO Auto-generated method stub
-                    Is_Valid_Time(tempTimeField); // pass your EditText Obj here.
-                }
-
-                public void Is_Valid_Time(EditText edt) {
-                    if (edt.getText().toString() == null) {
-                        edt.setError("Invalid Time Format (YYYY:MM:DD:HH:MM)");
-                        valid_time = null;
-                    } else if (isTimeValid(edt.getText().toString()) == false) {
-                        edt.setError("Invalid Time Format (YYYY:MM:DD:HH:MM)");
-                        valid_time = null;
-                    } else {
-                        valid_time = edt.getText().toString();
                     }
-                }
 
-                public boolean isTimeValid(String word) {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count,
+                                                  int after) {
+                        // TODO Auto-generated method stub
 
-                    return word.matches("[0-9]{4}:([0-9]{1,2}:){3}[0-9]{1,2}");
-                }
-            });
-            tempField.setEnabled(true);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        // TODO Auto-generated method stub
+
+                        // TODO Auto-generated method stub
+                        Is_Valid_Time(tempTimeField); // pass your EditText Obj here.
+                    }
+
+                    public void Is_Valid_Time(EditText edt) {
+                        if (edt.getText().toString() == null) {
+                            edt.setError("Invalid Time Format (YYYY:MM:DD:HH:MM)");
+                            valid_time = null;
+                        } else if (isTimeValid(edt.getText().toString()) == false) {
+                            edt.setError("Invalid Time Format (YYYY:MM:DD:HH:MM)");
+                            valid_time = null;
+                        } else {
+                            valid_time = edt.getText().toString();
+                        }
+                    }
+
+                    public boolean isTimeValid(String word) {
+
+                        return word.matches("[0-9]{4}:([0-9]{1,2}:){3}[0-9]{1,2}");
+                    }
+                });
+                tempField.setEnabled(true);
+
+            }else{
+                displayPopupMessage("Cannot Edit Records From Other Users!");
+            }
 
         }
         else if(editButton.getText().equals("Finished Edititng")){
@@ -238,26 +244,33 @@ private void displayPopupMessage(String message) {
 
 
     public void deleteRecordClicked(View view){
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-                        deleteRecord();
-                        break;
+        EditText userField = (EditText) findViewById(R.id.displayUserField);
+        String uname = userField.getText().toString();
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
+        if(uname.equals(user)) {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            //Yes button clicked
+                            deleteRecord();
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
                 }
-            }
-        };
+            };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-        builder.setMessage("Are You Sure You Want To Delete This Record?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
-
+            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+            builder.setMessage("Are You Sure You Want To Delete This Record?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
+        else{
+            displayPopupMessage("Cannot Delete Records From Other Users!");
+        }
 
     }
 
@@ -321,6 +334,7 @@ private void displayPopupMessage(String message) {
 
             EditText end = (EditText) findViewById(R.id.rightInputField);
             filterSelection2 = end.getText().toString();
+
         }
 
         TypedArray filterTypeArray =getResources().obtainTypedArray(R.array.filter_records_by_attribute_array);
@@ -345,7 +359,7 @@ private void displayPopupMessage(String message) {
         }
 
         if(filterType.equals(filterTypeArray.getString(0+2))) {//weather
-            //String species =
+
             String[] parameters = new String[5];
             parameters[0] = "getRecords";
             parameters[1] = user;
@@ -367,6 +381,18 @@ private void displayPopupMessage(String message) {
 
         if(filterType.equals(filterTypeArray.getString(0+4))) {//time of day
             //String species =
+
+            //String species =
+            try {
+                int start = Integer.parseInt(filterSelection);
+                int end = Integer.parseInt(filterSelection2);
+            }catch (Exception e){
+
+            }
+            if(filterSelection.equals("")){
+
+            }
+
             String[] parameters = new String[5];
             parameters[0] = "getRecords";
             parameters[1] = user;
@@ -518,11 +544,14 @@ private void displayPopupMessage(String message) {
     public void processResult(String result){
         if(!result.equals("no records")) {
             processRecordString(result);
+        }else{
+            currentRecords = new Record[0];
         }
         System.out.println(result);
-        if(currentDisplayedRecordIndex == -1){
-            currentDisplayedRecordIndex++;
-        }
+//        if(currentDisplayedRecordIndex == -1){
+//            currentDisplayedRecordIndex++;
+//        }
+        currentDisplayedRecordIndex = 0;
         if(currentRecords.length == 0){
             displayRecord(null);
         }else{
@@ -639,6 +668,9 @@ private void displayPopupMessage(String message) {
                 }
                 if(attribute[0].equalsIgnoreCase("path")){
                     temp.setPath(attribute[1]);
+                }
+                if(attribute[0].equalsIgnoreCase("hour")){
+                    temp.setHour(attribute[1]);
                 }
             }
             recordArray[i] = temp;

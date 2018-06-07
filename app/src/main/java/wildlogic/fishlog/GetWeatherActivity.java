@@ -1,16 +1,12 @@
 package wildlogic.fishlog;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONException;
@@ -76,9 +72,6 @@ public class GetWeatherActivity extends AppCompatActivity {
                 reader.close();
                 data = new JSONObject(json.toString());
 
-                // This value will be 404 if the request was not
-                // successful
-//                if (data.getInt("cod") != 200) {
                 if (status != 200) {
                     System.out.println("Status code is 200!");
                     return null;
@@ -89,25 +82,6 @@ public class GetWeatherActivity extends AppCompatActivity {
                 System.out.println(e.getMessage());
             }
             return data;
-        }
-
-        private JSONObject getWeather() {
-            JSONObject jsonWeather = null;
-//            JSONObject currentCond = null;
-//            String currTemp = "";
-//            String summary = "";
-            try {
-                jsonWeather = getWeatherJSON(recLat, recLon);
-//                currentCond = jsonWeather.getJSONObject("currently");
-//                currTemp = currentCond.getString("temperature");
-//                summary = currentCond.getString("summary");
-            } catch (Exception e) {
-                Log.d("Error", "Cannot process JSON results", e);
-            }
-            return jsonWeather;
-        }
-        protected void onPostExecute(JSONObject result) {
-
         }
 
     }
@@ -121,11 +95,22 @@ public class GetWeatherActivity extends AppCompatActivity {
         TextView windSpeedField = (TextView) findViewById(R.id.wind_speed_field);
         TextView precipChanceField = (TextView) findViewById(R.id.precip_chance_field);
 
-        //cityField.setText(this.weatherJson.getString());
         try {
 
             JSONObject currWeatherObj = this.weatherJson.getJSONObject("currently");
-            currCondField.setText(currWeatherObj.getString("icon"));
+            String conditions = currWeatherObj.getString("icon");
+
+            String[] condArr = conditions.split("-");
+            String condToDisplay = "";
+
+            for(int i = 0; i < condArr.length; i++){
+                condToDisplay += condArr[i].substring(0, 1).toUpperCase() + condArr[i].substring(1);
+                if( i != condArr.length - 1){
+                    condToDisplay += " ";
+                }
+            }
+
+            currCondField.setText(condToDisplay);
             currTempField.setText(currWeatherObj.getString("temperature") + " °F");
             cloudCoverField.setText(Float.toString(Float.parseFloat(currWeatherObj.getString("cloudCover")) * 100) + " %");
             windSpeedField.setText(currWeatherObj.getString("windSpeed") + " Miles per Hour");
@@ -147,7 +132,6 @@ public class GetWeatherActivity extends AppCompatActivity {
         recLon = (String) getIntent().getExtras().get("recLon");// code to this location
         String[] parameters = new String[8];
         String weatherStatusIndicator = "";
-        //String[] parameters = new String[7];
         Map<String, Object> params = new LinkedHashMap<>();
         parameters[0]= recLat;
         parameters[1]= recLon;
@@ -158,7 +142,6 @@ public class GetWeatherActivity extends AppCompatActivity {
         catch(Exception e){
             System.out.println("Exception: " + e.getMessage());
         }
-        // set ui fields to weather info and BAM
 
 
     }
@@ -174,11 +157,7 @@ public class GetWeatherActivity extends AppCompatActivity {
     }
 
     public void goBackToMain(View view){
-//        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-//        //i.putExtra("pictureData", bitmap);
-//        startActivityForResult(i, REQUEST_BACK_TO_MAIN);
         finish();
-
     }
 
 
@@ -186,44 +165,11 @@ public class GetWeatherActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        //client.connect();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        Action viewAction = Action.newAction(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "GetWeather Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        Action viewAction = Action.newAction(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "GetWeather Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://wildlogic.fishlog/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.end(client, viewAction);
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         if(client != null) {
             client.disconnect();
         }
